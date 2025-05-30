@@ -379,22 +379,19 @@ def mark_notification_read(notification_id):
 @login_required
 def today_questions():
     today = datetime.now().date()
-    
-    # Get questions that are due for review today
+    # Sadece tekrar tarihi bugün olan ve tamamlanmamış sorular
     questions = Question.query.filter(
         Question.UserId == current_user.UserId,
         Question.IsCompleted == False,
         Question.IsHidden == False,
         (
-            # First repeat is due today
-            (Question.RepeatCount == 0 and Question.Repeat1Date is not None and db.func.cast(Question.Repeat1Date, db.Date) == today) |
-            # Second repeat is due today
-            (Question.RepeatCount == 1 and Question.Repeat2Date is not None and db.func.cast(Question.Repeat2Date, db.Date) == today) |
-            # Third repeat is due today
-            (Question.RepeatCount == 2 and Question.Repeat3Date is not None and db.func.cast(Question.Repeat3Date, db.Date) == today)
+            (Question.RepeatCount == 0) & (db.func.cast(Question.Repeat1Date, db.Date) == today)
+            |
+            (Question.RepeatCount == 1) & (db.func.cast(Question.Repeat2Date, db.Date) == today)
+            |
+            (Question.RepeatCount == 2) & (db.func.cast(Question.Repeat3Date, db.Date) == today)
         )
     ).order_by(Question.Repeat1Date).all()
-
     categories = Category.query.all()
     return render_template('today_questions.html', questions=questions, categories=categories, section='takipsistemi', show_sidebar=True)
 
@@ -402,25 +399,19 @@ def today_questions():
 @login_required
 def past_questions():
     today = datetime.now().date()
-
-    # Tekrar tarihi bugünden önce olan, tamamlanmamış ve 3 tekrarı tamamlanmamış soruları filtrele
-    # Mevcut RepeatCount'a göre ilgili RepeatDate'in bugünden önce olması gerekir
+    # Tekrar tarihi bugün veya öncesi olup, tekrar tarihi gününde tamamlanmamış sorular
     questions = Question.query.filter(
         Question.UserId == current_user.UserId,
         Question.IsCompleted == False,
         Question.RepeatCount < 3,
         (
-            # RepeatCount 0 ise, Repeat1Date bugünden önce olmalı
-            (Question.RepeatCount == 0 and db.func.cast(Question.Repeat1Date, db.Date) < today)
+            (Question.RepeatCount == 0) & (db.func.cast(Question.Repeat1Date, db.Date) < today)
             |
-            # RepeatCount 1 ise, Repeat2Date bugünden önce olmalı
-            (Question.RepeatCount == 1 and db.func.cast(Question.Repeat2Date, db.Date) < today)
+            (Question.RepeatCount == 1) & (db.func.cast(Question.Repeat2Date, db.Date) < today)
             |
-            # RepeatCount 2 ise, Repeat3Date bugünden önce olmalı
-            (Question.RepeatCount == 2 and db.func.cast(Question.Repeat3Date, db.Date) < today)
+            (Question.RepeatCount == 2) & (db.func.cast(Question.Repeat3Date, db.Date) < today)
         )
-    ).order_by(Question.Repeat1Date.desc()).all() # Sıralama tercihi kalabilir
-    
+    ).order_by(Question.Repeat1Date.desc()).all()
     categories = Category.query.all()
     return render_template('past_questions.html', questions=questions, categories=categories, section='takipsistemi', show_sidebar=True)
 

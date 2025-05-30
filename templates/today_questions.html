@@ -2,19 +2,100 @@
 
 {% block title %}Bugünün Soruları - ReviseMe{% endblock %}
 
+{% block styles %}
+<style>
+    body {
+        background-color: transparent !important;
+        position: relative;
+    }
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/images/pastel-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -1;
+    }
+    .page-header {
+        color: #30E8E8;
+        margin-bottom: 2rem;
+        padding-top: 2rem;
+        font-weight: 800;
+        position: relative;
+        font-size: 2.5rem;
+        text-shadow: 0 0 15px rgba(48, 6, 75, 0.8), 0 0 20px rgba(48, 6, 75, 0.4);
+    }
+    .today-question-card {
+        background-color: rgba(26, 20, 64, 0.85);
+        border: 1px solid rgba(106, 55, 181, 0.3);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        color: #FFF;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+    .today-question-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(46, 205, 200, 0.3);
+        border-color: #2ECDC8;
+    }
+    .today-question-img {
+        height: 80px;
+        width: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-right: 20px;
+        border: 2px solid #8451D1;
+        background: #fff;
+    }
+    .today-question-content {
+        flex-grow: 1;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #FFF;
+        text-shadow: 0 0 8px rgba(0,0,0,0.4);
+    }
+    .today-question-btn {
+        font-weight: bold;
+        font-size: 1rem;
+        border-radius: 1.5rem;
+        padding: 0.5rem 1.2rem;
+        background: linear-gradient(135deg, #6A37B5, #8451D1);
+        color: #fff;
+        border: none;
+        box-shadow: 0 0 10px rgba(106, 55, 181, 0.3);
+        transition: all 0.2s;
+    }
+    .today-question-btn:hover {
+        background: linear-gradient(135deg, #2ECDC8, #8451D1);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
 {% block page_content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Bugünün Soruları</h2>
+    <h2 class="page-header">Bugünün Soruları</h2>
     <div class="row">
         {% for question in questions %}
-        <div class="col-12 mb-3 d-flex align-items-center border rounded p-2 bg-white">
+        <div class="col-12 today-question-card">
             {% if question.ImagePath or question.PhotoPath %}
-                <img src="{{ url_for('static', filename=question.ImagePath or question.PhotoPath) }}" alt="Soru Görseli" style="height: 80px; width: 80px; object-fit: cover; border-radius: 8px; margin-right: 16px;">
+                <img src="{{ url_for('static', filename=question.ImagePath or question.PhotoPath) }}" alt="Soru Görseli" class="today-question-img">
             {% endif %}
-            <div class="flex-grow-1">
-                <div class="fw-bold">{{ question.Content[:100] }}{% if question.Content|length > 100 %}...{% endif %}</div>
+            <div class="today-question-content">
+                {{ question.Content[:100] }}{% if question.Content|length > 100 %}...{% endif %}
             </div>
-            <a href="{{ url_for('view_today_question', question_id=question.QuestionId) }}" class="btn btn-primary ms-3"><i class="fas fa-eye"></i> Görüntüle</a>
+            <a href="{{ url_for('view_today_question', question_id=question.QuestionId) }}" class="today-question-btn ms-3"><i class="fas fa-eye"></i> Görüntüle</a>
         </div>
         {% endfor %}
         {% if questions|length == 0 %}

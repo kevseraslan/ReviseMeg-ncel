@@ -452,45 +452,45 @@
     
     {# Sidebar ve Responsive Layout Stilleri #}
     <style>
-        /* Wrapper ve Layout */
+        /* Sidebar ve içerik alanı için sade ve hatasız geçiş */
         #wrapper {
             display: flex;
             width: 100%;
             min-height: 100vh;
-            transition: all 0.3s;
         }
-        
-        /* Sidebar Styles */
         .sidebar-wrapper {
             width: 250px;
+            min-width: 250px;
+            max-width: 250px;
             transition: margin-left 0.3s, width 0.3s;
+            background: #232946;
         }
-        
-        /* Content Wrapper */
+        .sidebar-wrapper.sidebar-collapsed {
+            margin-left: -250px;
+        }
         .main-content-area {
             flex: 1 1 0%;
             width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 0 !important;
+            padding: 0 !important;
             transition: all 0.3s;
         }
-        
-        #wrapper.toggled .sidebar-wrapper {
-            margin-left: 0;
+        .main-content-area .container,
+        .main-content-area .container-fluid {
+            margin: 0 !important;
+            padding: 0 !important;
         }
-        
-        #wrapper:not(.toggled) .sidebar-wrapper {
-            margin-left: -250px;
+        .inner-content-wrapper {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            box-sizing: border-box;
         }
-        
-        #wrapper:not(.toggled) .main-content-area {
-            width: 100% !important;
-            margin-left: 0 !important;
-        }
-        
-        #wrapper.toggled .main-content-area {
-            margin-left: 0;
-        }
-        
-        /* Mobile Responsive */
         @media (max-width: 991.98px) {
             .sidebar-wrapper {
                 position: fixed;
@@ -498,78 +498,6 @@
                 left: 0;
                 height: 100vh;
                 z-index: 1500;
-            }
-            #wrapper.toggled .sidebar-wrapper {
-                margin-left: 0;
-            }
-            #wrapper:not(.toggled) .sidebar-wrapper {
-                margin-left: -250px;
-            }
-            .main-content-area {
-                width: 100% !important;
-                margin-left: 0 !important;
-            }
-        }
-        
-        /* Small Mobile Devices */
-        @media (max-width: 575.98px) {
-            .content-container {
-                padding: 1rem;
-            }
-            
-            #sidebar-wrapper {
-                width: 85%;
-            }
-            
-            /* Overlay when sidebar is open on mobile */
-            #wrapper.toggled::after {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.5);
-                z-index: 1030;
-            }
-        }
-        
-        /* Collapsed Sidebar (Mini Variant) */
-        #wrapper.sidebar-mini #sidebar-wrapper {
-            width: var(--sidebar-width-collapsed);
-        }
-        
-        #wrapper.sidebar-mini #page-content-wrapper {
-            padding-left: var(--sidebar-width-collapsed);
-        }
-        
-        #wrapper.sidebar-mini .sidebar-item span {
-            display: none;
-        }
-        
-        #wrapper.sidebar-mini .sidebar-item {
-            text-align: center;
-            padding: 0.85rem 0;
-        }
-        
-        #wrapper.sidebar-mini .sidebar-item i {
-            margin-right: 0;
-            font-size: 1.3rem;
-        }
-        
-        #wrapper.sidebar-mini .sidebar-heading span {
-            display: none;
-        }
-        
-        @media (min-width: 992px) {
-            #sidebarCollapseBtn {
-                display: inline-block;
-            }
-        }
-        
-        @media (max-width: 991.98px) {
-            #sidebarCollapseBtn {
-                display: none;
             }
         }
     </style>
@@ -922,9 +850,9 @@
     {% include 'components/navbar.html' %}
     
     <!-- Sidebar Toggle Button (Hamburger) -->
-    <button id="sidebarToggle" class="btn btn-primary d-md-none position-fixed" style="top: 15px; left: 15px; z-index: 2000;">
+    {# <button id="sidebarToggle" class="btn btn-primary position-fixed" style="top: 15px; left: 15px; z-index: 2000;">
         <i class="fas fa-bars"></i>
-    </button>
+    </button> #}
     
     <div class="container-fluid p-0 main-content">
         <div id="wrapper">
@@ -934,7 +862,9 @@
             </div>
             {% endif %}
             <div class="main-content-area" id="main-content-col">
-                {% block page_content %}{% endblock %}
+                <div class="inner-content-wrapper">
+                    {% block page_content %}{% endblock %}
+                </div>
             </div>
         </div>
     </div>
@@ -970,27 +900,39 @@
     });
     </script>
     <style>
-    /* Sidebar aç/kapa animasyonu */
+    /* Sidebar aç/kapa animasyonu ve içerik dinamik hizalama */
     .sidebar-wrapper {
-        transition: margin-left 0.3s;
+        width: 250px;
+        transition: margin-left 0.3s, width 0.3s;
         min-height: 100vh;
         background: #232946;
     }
-    .sidebar-collapsed {
-        margin-left: -250px !important;
+    .sidebar-wrapper.sidebar-collapsed {
+        margin-left: -250px;
     }
-    /* Sidebar kapalıyken ana içerik sola yanaşsın */
-    #sidebar-wrapper.sidebar-collapsed ~ #main-content-col,
-    #sidebar-wrapper.sidebar-collapsed ~ .main-content-area {
-        margin-left: 0 !important;
+    .main-content-area {
+        margin-left: 250px;
         transition: margin-left 0.3s;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        min-height: 100vh;
     }
-    @media (min-width: 992px) {
-        #sidebar-wrapper:not(.sidebar-collapsed) ~ #main-content-col,
-        #sidebar-wrapper:not(.sidebar-collapsed) ~ .main-content-area {
-            margin-left: 250px !important;
-            transition: margin-left 0.3s;
-        }
+    .main-content-area.sidebar-collapsed {
+        margin-left: 0 !important;
+    }
+    .inner-content-wrapper {
+        max-width: 1200px;
+        width: 100%;
+        padding: 32px 24px;
+        box-sizing: border-box;
+    }
+    /* İçerik ve container'larda margin/padding sıfırla */
+    .main-content-area,
+    .main-content-area .container,
+    .main-content-area .container-fluid {
+        margin: 0 !important;
+        padding: 0 !important;
     }
     @media (max-width: 991.98px) {
         .sidebar-wrapper {
