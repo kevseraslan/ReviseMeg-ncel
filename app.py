@@ -1197,8 +1197,8 @@ def report():
         completed_tasks=completed_tasks,
         overdue_tasks=overdue_tasks,
         completion_rate=completion_rate,
-        section='hedefleyici', # Bunu takipsistemi yerine hedefleyici yaptım
-        show_sidebar=True # Show sidebar
+        section='hedefleyici',
+        show_sidebar=False
     )
 
 @app.route('/pomodoro_settings')

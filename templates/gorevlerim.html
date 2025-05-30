@@ -265,18 +265,23 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('gorevlerim') }}">
+            <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
                 <i class="fas fa-tasks"></i> Görevlerim
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('listening') }}">
+            <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
                 <i class="fas fa-headphones"></i> Listening
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
+                <i class="fas fa-file-alt"></i> Günlük Raporu Gör
             </a>
         </li>
     </ul>
     <div class="mt-auto w-100 p-3">
-        <a href="{{ url_for('report') }}" class="btn btn-outline-secondary w-100"><i class="fas fa-file-alt"></i> Günlük Raporu Gör</a>
+        <!-- Günlük Raporu Gör butonu kaldırıldı -->
     </div>
 </div>
 <div class="planner-content" id="planner-content">
