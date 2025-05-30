@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Görevlerim - ReviseMe{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        background-color: transparent !important;
+        position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/images/pastel-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -1;
+    }
+    
+    h2 {
+        color: #30E8E8;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 15px rgba(48, 6, 75, 0.8), 0 0 20px rgba(48, 6, 75, 0.4);
+    }
+    
+    .card {
+        background-color: rgba(26, 20, 64, 0.8);
+        border: 1px solid rgba(106, 55, 181, 0.3);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        color: #FFF;
+        backdrop-filter: blur(5px);
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(46, 205, 200, 0.3);
+        border-color: var(--accent-turquoise);
+    }
+    
+    .card-title {
+        color: white;
+        text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+    }
+    
+    .card-subtitle {
+        color: #CCC !important;
+    }
+    
+    .card-text {
+        color: #EEE;
+    }
+    
+    .text-muted {
+        color: #AAA !important;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, rgba(106, 55, 181, 0.9), rgba(132, 81, 209, 0.9));
+        border: none;
+        box-shadow: 0 0 15px rgba(106, 55, 181, 0.5);
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, rgba(132, 81, 209, 0.9), rgba(106, 55, 181, 0.9));
+        transform: translateY(-3px);
+    }
+    
+    .btn-outline-primary {
+        color: #FFF;
+        border-color: rgba(106, 55, 181, 0.5);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: rgba(106, 55, 181, 0.3);
+        color: #FFF;
+        border-color: rgba(106, 55, 181, 0.8);
+    }
+    
+    .btn-outline-success {
+        color: #FFF;
+        border-color: rgba(46, 205, 200, 0.5);
+    }
+    
+    .btn-outline-success:hover {
+        background-color: rgba(46, 205, 200, 0.3);
+        color: #FFF;
+        border-color: rgba(46, 205, 200, 0.8);
+    }
+    
+    .btn-outline-danger {
+        color: #FFF;
+        border-color: rgba(245, 111, 173, 0.5);
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: rgba(245, 111, 173, 0.3);
+        color: #FFF;
+        border-color: rgba(245, 111, 173, 0.8);
+    }
+    
+    .btn-outline-light {
+        color: #FFF;
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #FFF;
+    }
+    
+    .list-group-item {
+        background-color: rgba(26, 20, 64, 0.5);
+        border: 1px solid rgba(106, 55, 181, 0.2);
+        color: #EEE;
+    }
+    
+    .progress {
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .progress-bar {
+        background: linear-gradient(135deg, rgba(46, 205, 200, 0.9), rgba(106, 55, 181, 0.9));
+    }
+    
+    .modal-content {
+        background-color: rgba(26, 20, 64, 0.95);
+        border: 1px solid rgba(106, 55, 181, 0.3);
+        color: #FFF;
+        backdrop-filter: blur(10px);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid rgba(106, 55, 181, 0.3);
+    }
+    
+    .modal-footer {
+        border-top: 1px solid rgba(106, 55, 181, 0.3);
+    }
+    
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(106, 55, 181, 0.3);
+        color: #FFF;
+    }
+    
+    .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-color: rgba(46, 205, 200, 0.5);
+        color: #FFF;
+        box-shadow: 0 0 0 0.25rem rgba(46, 205, 200, 0.25);
+    }
+    
+    .form-label {
+        color: #CCC;
+    }
+    
+    /* Simüle edilmiş yıldızlar */
+    @keyframes twinkle {
+        0% { opacity: 0.3; }
+        50% { opacity: 1; }
+        100% { opacity: 0.3; }
+    }
+    
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background-color: white;
+        border-radius: 50%;
+    }
+    
+    .star-1 { top: 10%; left: 20%; animation: twinkle 3s infinite ease-in-out; }
+    .star-2 { top: 15%; left: 50%; animation: twinkle 4s infinite ease-in-out; }
+    .star-3 { top: 25%; left: 80%; animation: twinkle 5s infinite ease-in-out; }
+    .star-4 { top: 40%; left: 10%; animation: twinkle 4.5s infinite ease-in-out; }
+    .star-5 { top: 60%; left: 30%; animation: twinkle 3.5s infinite ease-in-out; }
+    .star-6 { top: 75%; left: 60%; animation: twinkle 4s infinite ease-in-out; }
+    .star-7 { top: 85%; left: 90%; animation: twinkle 3s infinite ease-in-out; }
+
+    .planner-sidebar {
+        width: 250px;
+        background: rgba(35, 41, 70, 0.95);
+        min-height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        transition: all 0.3s;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .planner-sidebar .nav-link {
+        color: #fff;
+        padding: 0.8rem 1rem;
+        transition: all 0.3s;
+    }
+    .planner-sidebar .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        color: #30E8E8;
+    }
+    .planner-sidebar .nav-link.active {
+        background: rgba(48, 232, 232, 0.2);
+        color: #30E8E8;
+    }
+    .planner-sidebar .nav-link i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    .planner-content {
+        margin-left: 250px;
+        padding: 20px;
+        transition: all 0.3s;
+    }
+    
+    .card-body.bg-light, .card-body[style*="background:#eafaf1"] {
+        background: rgba(26, 20, 64, 0.85) !important;
+        color: #fff !important;
+    }
+    .mb-3.p-3.bg-white.rounded.shadow-sm {
+        background: rgba(26, 20, 64, 0.92) !important;
+        color: #fff !important;
+    }
+    .text-muted, .card-body .text-muted.small {
+        color: #bdbdbd !important;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="planner-sidebar" id="planner-sidebar">
+    <a href="{{ url_for('index') }}"
+       class="btn btn-outline-primary mb-4"
+       style="font-weight:bold; font-size:1.1rem; width: 90%; max-width: 220px; padding: 0.75rem 1.5rem; border-radius: 1.5rem; margin-top: 2.5rem;">
+        <i class="fas fa-list"></i> Tekrar Sistemine Geç
+    </a>
+    <h5 class="text-light mb-4 w-100 text-center">Planlayıcı</h5>
+    <ul class="nav flex-column w-100">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('kitaplarim') }}">
+                <i class="fas fa-book"></i> Kitaplarım
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('gorevlerim') }}">
+                <i class="fas fa-tasks"></i> Görevlerim
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('listening') }}">
+                <i class="fas fa-headphones"></i> Listening
+            </a>
+        </li>
+    </ul>
+    <div class="mt-auto w-100 p-3">
+        <a href="{{ url_for('report') }}" class="btn btn-outline-secondary w-100"><i class="fas fa-file-alt"></i> Günlük Raporu Gör</a>
+    </div>
+</div>
+<div class="planner-content" id="planner-content">
+    <div class="stars">
+        <div class="star star-1"></div>
+        <div class="star star-2"></div>
+        <div class="star star-3"></div>
+        <div class="star star-4"></div>
+        <div class="star star-5"></div>
+        <div class="star star-6"></div>
+        <div class="star star-7"></div>
+    </div>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="mb-0">Görevlerim</h2>
+            <div>
+                <a href="{{ url_for('gorevlerim_add_task') }}" class="btn btn-primary me-2"><i class="fas fa-plus"></i> Yeni Görev Ekle</a>
+            </div>
+        </div>
+        <!-- Görevler (Aktif + Geciken) -->
+        <div class="mb-4">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="fas fa-tasks"></i> Görevler
+                </div>
+                <div class="card-body bg-light">
+                    {% if active_tasks %}
+                        {% for task in active_tasks %}
+                        <div class="mb-3 p-3 bg-white rounded shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div>
+                                    <div class="fw-bold {% if task.DueDate < now and task.Status != 'completed' %}text-danger{% endif %}">
+                                        {{ task.Title }}
+                                        {% if task.DueDate < now and task.Status != 'completed' %}
+                                            <span class="badge bg-danger ms-2">Gecikti</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-muted small">{{ task.Description }}</div>
+                                    <div class="mt-2">
+                                        <span class="badge bg-secondary">Son Tarih: {{ task.DueDate.strftime('%d.%m.%Y %H:%M') }}</span>
+                                        <span class="badge bg-info text-dark">{{ task.Priority }}</span>
+                                        <span class="badge bg-dark">{{ task.Category }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 mt-2 mt-md-0">
+                                    <button class="btn btn-success btn-sm" onclick="completeTask({{ task.TaskId }})"><i class="fas fa-check"></i> Tamamla</button>
+                                    <a href="{{ url_for('edit_task', task_id=task.TaskId) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Düzenle</a>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTask({{ task.TaskId }})"><i class="fas fa-trash"></i> Sil</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-muted">Görev bulunmuyor.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- Son Tamamlanan Görevler -->
+        <div class="mb-4">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white fw-bold">
+                    <i class="fas fa-check-circle"></i> Son Tamamlanan Görevler
+                </div>
+                <div class="card-body" style="background:#eafaf1;">
+                    {% if completed_tasks %}
+                        {% for task in completed_tasks %}
+                        <div class="mb-3 p-3 bg-white rounded shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div>
+                                    <div class="fw-bold">{{ task.Title }}</div>
+                                    <div class="text-muted small">{{ task.Description }}</div>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success">Tamamlanma: {{ task.CompletedAt.strftime('%d.%m.%Y %H:%M') }}</span>
+                                        <span class="badge bg-dark">{{ task.Category }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 mt-2 mt-md-0">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTask({{ task.TaskId }})"><i class="fas fa-trash"></i> Sil</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-muted">Son tamamlanan görev bulunmuyor.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function completeTask(taskId) {
+    if (confirm('Bu görevi tamamlandı olarak işaretlemek istediğinize emin misiniz?')) {
+        fetch(`/complete-task/${taskId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Görev tamamlanırken bir hata oluştu.');
+            }
+        });
+    }
+}
+
+function deleteTask(taskId) {
+    if (confirm('Bu görevi silmek istediğinize emin misiniz?')) {
+        fetch(`/delete-task/${taskId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Görev silinirken bir hata oluştu.');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 
