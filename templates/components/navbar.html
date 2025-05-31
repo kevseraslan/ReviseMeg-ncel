@@ -7,6 +7,38 @@
         <button id="sidebarToggle" class="btn btn-link ms-2 p-0" type="button" style="font-size: 1.7rem;">
             <i class="fas fa-bars"></i>
         </button>
+        <!-- Bildirimler Dropdown -->
+        <li class="nav-item dropdown list-unstyled d-inline-block ms-2">
+            <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                {% if notification_count is defined and notification_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ notification_count }}
+                </span>
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 320px;">
+                <li class="dropdown-header text-center fw-bold">Bildirimler</li>
+                {% if notifications is defined and notifications %}
+                    {% for n in notifications %}
+                    <li class="px-3 py-2">
+                        <div class="fw-semibold">
+                            {% if n.type == 'Bugün' %}<i class="fas fa-bolt text-primary me-1"></i>{% endif %}
+                            {% if n.type == 'Gecikmiş' %}<i class="fas fa-exclamation-triangle text-warning me-1"></i>{% endif %}
+                            {% if n.type == 'Motive' %}<i class="fas fa-heart text-danger me-1"></i>{% endif %}
+                            {{ n.msg }}
+                        </div>
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="px-3 py-2 text-muted">Hiç bildirimin yok, harikasın!</li>
+                {% endif %}
+                <li><hr class="dropdown-divider"></li>
+                <li class="text-center mb-1">
+                    <a href="{{ url_for('notifications') }}" class="btn btn-sm btn-outline-primary">Tüm Bildirimler</a>
+                </li>
+            </ul>
+        </li>
         <div class="ms-auto d-flex align-items-center">
             <div class="dropdown">
                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

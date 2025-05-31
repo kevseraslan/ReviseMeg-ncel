@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Kategori Soruları - ReviseMe{% endblock %}
+{% block title %}{{ category.Name }} Soruları - ReviseMe{% endblock %}
 
 {% block page_content %}
 <div class="container-fluid">
@@ -10,8 +10,8 @@
             <!-- Üst Menü -->
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">{{ category.Name }} Soruları</h1>
-                <a href="{{ url_for('questions') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Geri Dön
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Geri
                 </a>
             </div>
 

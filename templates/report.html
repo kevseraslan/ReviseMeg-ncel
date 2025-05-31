@@ -3,172 +3,140 @@
 {% block title %}Günlük Rapor - ReviseMe{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
-    body {
-        background-color: transparent !important;
-        position: relative;
-    }
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url('/static/images/pastel-background.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        z-index: -1;
-    }
-    .planner-sidebar {
-        width: 250px;
-        background: rgba(35, 41, 70, 0.95);
-        min-height: 100vh;
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: 1000;
-        transition: all 0.3s;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .planner-sidebar .nav-link {
-        color: #fff;
-        padding: 0.8rem 1rem;
-        transition: all 0.3s;
-    }
-    .planner-sidebar .nav-link:hover {
-        background: rgba(255,255,255,0.1);
-        color: #30E8E8;
-    }
-    .planner-sidebar .nav-link.active {
-        background: rgba(48, 232, 232, 0.2);
-        color: #30E8E8;
-    }
-    .planner-sidebar .nav-link i {
-        margin-right: 10px;
-        width: 20px;
-        text-align: center;
-    }
-    .planner-content {
-        margin-left: 250px;
-        padding: 20px;
-        transition: all 0.3s;
-    }
+.side-menu {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 250px;
+    min-height: calc(100vh - 56px);
+    z-index: 1000;
+}
+.main-content-area {
+    margin-left: 250px;
+    margin-top: 56px;
+}
 </style>
 {% endblock %}
 
 {% block page_content %}
-<div class="planner-sidebar" id="planner-sidebar">
-    <a href="{{ url_for('index') }}"
-       class="btn btn-outline-primary mb-4"
-       style="font-weight:bold; font-size:1.1rem; width: 90%; max-width: 220px; padding: 0.75rem 1.5rem; border-radius: 1.5rem; margin-top: 2.5rem;">
-        <i class="fas fa-list"></i> Tekrar Sistemine Geç
-    </a>
-    <h5 class="text-light mb-4 w-100 text-center">Planlayıcı</h5>
-    <ul class="nav flex-column w-100">
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('kitaplarim') }}">
-                <i class="fas fa-book"></i> Kitaplarım
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('gorevlerim') }}">
-                <i class="fas fa-tasks"></i> Görevlerim
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('listening') }}">
-                <i class="fas fa-headphones"></i> Listening
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('report') }}">
-                <i class="fas fa-file-alt"></i> Günlük Raporu Gör
-            </a>
-        </li>
-    </ul>
-</div>
-<div class="planner-content" id="planner-content">
-    <div class="container mt-4">
-        <h2 class="mb-4 text-primary"><i class="fas fa-file-alt"></i> Günlük Görev Raporu ({{ report_date }})</h2>
-        <!-- Özet Kutucuklar -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-2">
-                <div class="card text-white bg-success text-center">
-                    <div class="card-body">
-                        <div class="fw-bold">Tamamlanan Görevler</div>
-                        <div style="font-size:2rem;">{{ completed_count }}</div>
-                    </div>
-                </div>
+<div class="container-fluid p-0 main-content">
+    <div id="wrapper">
+        <div class="side-menu" id="sidebar-wrapper">
+            <div class="mb-3 text-center" style="margin-top: 4rem;">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
+                    <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
+                </a>
             </div>
-            <div class="col-md-4 mb-2">
-                <div class="card text-white bg-danger text-center">
-                    <div class="card-body">
-                        <div class="fw-bold">Geciken Görevler</div>
-                        <div style="font-size:2rem;">{{ overdue_count }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-2">
-                <div class="card text-white bg-info text-center">
-                    <div class="card-body">
-                        <div class="fw-bold">Tamamlanma Oranı</div>
-                        <div style="font-size:2rem;">%{{ completion_rate }}</div>
-                    </div>
-                </div>
-            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
+                        <i class="fas fa-book"></i> Kitaplarım
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
+                        <i class="fas fa-tasks"></i> Görevlerim
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
+                        <i class="fas fa-headphones"></i> Listening
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
+                        <i class="fas fa-chart-bar"></i> Günlük Raporu Gör
+                    </a>
+                </li>
+            </ul>
         </div>
-        <!-- Detaylı Listeler -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">Tamamlanan Görevler</div>
-                    <ul class="list-group list-group-flush">
-                        {% for task in completed_tasks %}
-                        <li class="list-group-item">{{ task.Title }}</li>
-                        {% else %}
-                        <li class="list-group-item text-muted">Bugün tamamlanan görev yok.</li>
-                        {% endfor %}
-                    </ul>
+        <div class="main-content-area" id="main-content-col">
+            <div class="inner-content-wrapper">
+                <div class="container mt-4">
+                    <h2 class="mb-4 text-primary"><i class="fas fa-file-alt"></i> Günlük Görev Raporu ({{ report_date }})</h2>
+                    <!-- Özet Kutucuklar -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-2">
+                            <div class="card text-white bg-success text-center">
+                                <div class="card-body">
+                                    <div class="fw-bold">Tamamlanan Görevler</div>
+                                    <div style="font-size:2rem;">{{ completed_count }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="card text-white bg-danger text-center">
+                                <div class="card-body">
+                                    <div class="fw-bold">Geciken Görevler</div>
+                                    <div style="font-size:2rem;">{{ overdue_count }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="card text-white bg-info text-center">
+                                <div class="card-body">
+                                    <div class="fw-bold">Tamamlanma Oranı</div>
+                                    <div style="font-size:2rem;">%{{ completion_rate }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Detaylı Listeler -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-success text-white">Tamamlanan Görevler</div>
+                                <ul class="list-group list-group-flush">
+                                    {% for task in completed_tasks %}
+                                    <li class="list-group-item">{{ task.Title }}</li>
+                                    {% else %}
+                                    <li class="list-group-item text-muted">Bugün tamamlanan görev yok.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-danger text-white">Geciken Görevler</div>
+                                <ul class="list-group list-group-flush">
+                                    {% for task in overdue_tasks %}
+                                    <li class="list-group-item">{{ task.Title }} <span class="badge bg-danger ms-2">{{ task.DueDate.strftime('%d.%m.%Y %H:%M') }}</span></li>
+                                    {% else %}
+                                    <li class="list-group-item text-muted">Geciken görev yok.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Toplam Çalışma Süresi ve Özet -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-secondary text-white">Özet</div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Bugün tamamlanan görev sayısı: <b>{{ completed_count }}</b></li>
+                                <li>Geciken görev sayısı: <b>{{ overdue_count }}</b></li>
+                                <li>Toplam çalışma süresi: <b>{{ total_time }} dakika</b></li>
+                            </ul>
+                            {% if completed_count == 0 and overdue_count > 0 %}
+                                <div class="alert alert-warning mt-3">Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!</div>
+                            {% elif completed_count > 0 and overdue_count == 0 %}
+                                <div class="alert alert-success mt-3">Tebrikler! Bugün tüm görevlerini tamamladın!</div>
+                            {% elif completed_count > 0 and overdue_count > 0 %}
+                                <div class="alert alert-info mt-3">Bazı görevleri tamamladın, bazıları ise gecikti. Yarın daha iyisi için devam et!</div>
+                            {% else %}
+                                <div class="alert alert-secondary mt-3">Bugün için görev bulunmuyor.</div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header bg-danger text-white">Geciken Görevler</div>
-                    <ul class="list-group list-group-flush">
-                        {% for task in overdue_tasks %}
-                        <li class="list-group-item">{{ task.Title }} <span class="badge bg-danger ms-2">{{ task.DueDate.strftime('%d.%m.%Y %H:%M') }}</span></li>
-                        {% else %}
-                        <li class="list-group-item text-muted">Geciken görev yok.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <!-- Toplam Çalışma Süresi ve Özet -->
-        <div class="card mt-4">
-            <div class="card-header bg-secondary text-white">Özet</div>
-            <div class="card-body">
-                <ul>
-                    <li>Bugün tamamlanan görev sayısı: <b>{{ completed_count }}</b></li>
-                    <li>Geciken görev sayısı: <b>{{ overdue_count }}</b></li>
-                    <li>Toplam çalışma süresi: <b>{{ total_time }} dakika</b></li>
-                </ul>
-                {% if completed_count == 0 and overdue_count > 0 %}
-                    <div class="alert alert-warning mt-3">Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!</div>
-                {% elif completed_count > 0 and overdue_count == 0 %}
-                    <div class="alert alert-success mt-3">Tebrikler! Bugün tüm görevlerini tamamladın!</div>
-                {% elif completed_count > 0 and overdue_count > 0 %}
-                    <div class="alert alert-info mt-3">Bazı görevleri tamamladın, bazıları ise gecikti. Yarın daha iyisi için devam et!</div>
-                {% else %}
-                    <div class="alert alert-secondary mt-3">Bugün için görev bulunmuyor.</div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Sayfa içi hamburger ve sidebar aç/kapa kodları kaldırıldı, ana js veya base.html'deki kod kullanılacak -->
 {% endblock %} 

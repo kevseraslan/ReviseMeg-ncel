@@ -693,7 +693,7 @@ def add_question():
             db.session.add(new_question)
             db.session.commit()
             flash('Soru başarıyla eklendi.', 'success')
-            return redirect(url_for('questions'))
+            return redirect(url_for('index'))
         except Exception as e:
             db.session.rollback()
             flash('Soru eklenirken bir hata oluştu: ' + str(e), 'error')
@@ -715,7 +715,7 @@ def edit_question(question_id):
     question = Question.query.get_or_404(question_id)
     if question.UserId != current_user.UserId:
         flash('Bu soruyu düzenleme yetkiniz yok.')
-        return redirect(url_for('questions'))
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         question.Content = request.form.get('content')
@@ -724,7 +724,7 @@ def edit_question(question_id):
         try:
             db.session.commit()
             flash('Soru başarıyla güncellendi.')
-            return redirect(url_for('questions'))
+            return redirect(url_for('index'))
         except Exception as e:
             db.session.rollback()
             flash('Soru güncellenirken bir hata oluştu.')
@@ -853,44 +853,6 @@ def mark_completed(question_id):
 @login_required
 def settings():
     return render_template('settings.html', section='takipsistemi', show_sidebar=True)
-
-@app.route('/questions')
-@login_required
-def questions():
-    # Bu rotada artık tüm soruları çekmiyoruz, sadece kategorileri gönderiyoruz
-    # query = Question.query.filter_by(UserId=current_user.UserId, IsHidden=False)
-    # questions = query.order_by(Question.QuestionId.desc()).all()
-
-    # Rastgele motive mesajı seç (bu kısım kalabilir veya kaldırılabilir)
-    motivation_messages = [
-        "Her gün bir adım daha ileri!",
-        "Baş başarı yolunda her soru bir fırsat!",
-        "Bugün çalış, yarın başar!",
-        "Küçük adımlar büyük başarılar getirir!",
-        "Her soru seni hedefe yaklaştırıyor!"
-    ]
-    motivation_message = random.choice(motivation_messages)
-    
-    all_categories = Category.query.all()
-    categories_with_counts = []
-    for category in all_categories:
-        # Mevcut kullanıcıya ait ve gizli olmayan soruları say
-        question_count = Question.query.filter_by(
-            UserId=current_user.UserId,
-            CategoryId=category.CategoryId,
-            IsHidden=False
-        ).count()
-        categories_with_counts.append({
-            'category': category,
-            'count': question_count
-        })
-
-    return render_template('questions.html',
-                         categories_with_counts=categories_with_counts,
-                         motivation_message=motivation_message,
-                         section='takipsistemi', # Set section for sidebar
-                           show_sidebar=True # Show sidebar
-)
 
 @app.route('/category/<int:category_id>')
 @login_required

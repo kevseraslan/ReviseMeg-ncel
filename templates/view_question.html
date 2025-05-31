@@ -11,8 +11,8 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Soru Detayı</h1>
                 <div>
-                    <a href="{{ url_for('questions') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Geri Dön
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Geri
                     </a>
                     <button onclick="toggleFavorite({{ question.QuestionId }})" class="btn {{ 'btn-warning' if is_favorite else 'btn-outline-warning' }}">
                         <i class="fas fa-star"></i> {{ 'Favorilerden Çıkar' if is_favorite else 'Favorilere Ekle' }}
@@ -146,7 +146,7 @@ function deleteQuestion(questionId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.href = "{{ url_for('questions') }}";
+                window.location.href = "{{ url_for('index') }}";
             } else {
                 alert('Soru silinirken bir hata oluştu.');
             }

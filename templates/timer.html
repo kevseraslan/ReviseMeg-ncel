@@ -2,8 +2,8 @@
 
 {% block title %}Sayaç - ReviseMe{% endblock %}
 
-{% block content %}
-<div class="container mt-4" style="max-width:600px;">
+{% block page_content %}
+<div class="inner-content-wrapper">
     <h2 class="mb-4 text-center"><i class="fas fa-stopwatch"></i> Pomodoro Sayaç</h2>
     <div class="card mb-4">
         <div class="card-body text-center">
@@ -79,6 +79,68 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        background-color: #16161a !important;
+    }
+    .card {
+        background: #232946;
+        color: #fff;
+        border: none;
+        box-shadow: 0 2px 16px rgba(48, 6, 75, 0.08);
+    }
+    .card-header.bg-light {
+        background: #232946 !important;
+        color: #30E8E8 !important;
+        border-bottom: 1px solid #2d3250;
+    }
+    .form-label, .form-check-label {
+        color: #b8c1ec;
+    }
+    .form-control {
+        background: #16161a;
+        color: #fff;
+        border: 1px solid #2d3250;
+    }
+    .form-control:focus {
+        background: #232946;
+        color: #fff;
+        border-color: #30E8E8;
+        box-shadow: 0 0 0 0.2rem rgba(48, 232, 232, 0.15);
+    }
+    .btn-primary, .btn-success, .btn-danger, .btn-secondary, .btn-warning {
+        border: none;
+        font-weight: 600;
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, #30E8E8 0%, #536976 100%);
+        color: #fff;
+    }
+    .btn-success {
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #232946;
+    }
+    .btn-danger {
+        background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
+        color: #fff;
+    }
+    .btn-secondary {
+        background: #b8c1ec;
+        color: #232946;
+    }
+    .btn-warning {
+        background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%);
+        color: #232946;
+    }
+    .inner-content-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 32px 0;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}

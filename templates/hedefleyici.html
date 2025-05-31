@@ -3,6 +3,7 @@
 {% block title %}Planlayıcı{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
     body {
         background-color: transparent !important;
@@ -39,23 +40,20 @@
     }
     
     /* Sidebar Styles */
-    .planner-sidebar {
-        width: 250px;
-        background: rgba(35, 41, 70, 0.95);
-        min-height: 100vh;
+    .sidebar-wrapper {
         position: fixed;
-        left: 0;
         top: 0;
+        left: 0;
+        width: 250px;
+        min-height: 100vh;
         z-index: 1000;
+        background: #232946;
         transition: left 0.3s;
         box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
     
-    .planner-sidebar.sidebar-collapsed {
-        left: -250px !important;
+    .sidebar-wrapper.sidebar-collapsed {
+        left: -250px;
     }
     
     .planner-sidebar .nav-link {
@@ -80,14 +78,18 @@
         text-align: center;
     }
     
-    .planner-content {
+    .main-content-area {
         margin-left: 250px;
-        padding: 20px;
+        margin-top: 56px;
         transition: margin-left 0.3s;
     }
     
-    .planner-content.sidebar-collapsed {
-        margin-left: 0 !important;
+    .main-content-area.sidebar-collapsed {
+        margin-left: 0;
+    }
+    
+    #wrapper {
+        display: block !important;
     }
     
     /* Simüle edilmiş yıldızlar */
@@ -134,71 +136,63 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="stars">
-    <div class="star star-1"></div>
-    <div class="star star-2"></div>
-    <div class="star star-3"></div>
-    <div class="star star-4"></div>
-    <div class="star star-5"></div>
-    <div class="star star-6"></div>
-    <div class="star star-7"></div>
-</div>
-
-<!-- Planlayıcı Sidebar -->
-<div class="planner-sidebar" id="planner-sidebar">
-    <div class="mb-3 text-center" style="margin-top: 4rem;">
-        <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
-            <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
-        </a>
+<div class="container-fluid p-0 main-content">
+    <div id="wrapper">
+        <div class="side-menu" id="sidebar-wrapper">
+            <div class="mb-3 text-center" style="margin-top: 4rem;">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
+                    <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
+                </a>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
+                        <i class="fas fa-book"></i> Kitaplarım
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
+                        <i class="fas fa-tasks"></i> Görevlerim
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
+                        <i class="fas fa-headphones"></i> Listening
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
+                        <i class="fas fa-chart-bar"></i> Günlük Raporu Gör
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="main-content-area" id="main-content-col">
+            <div class="inner-content-wrapper">
+                <div class="stars">
+                    <div class="star star-1"></div>
+                    <div class="star star-2"></div>
+                    <div class="star star-3"></div>
+                    <div class="star star-4"></div>
+                    <div class="star star-5"></div>
+                    <div class="star star-6"></div>
+                    <div class="star star-7"></div>
+                </div>
+                <!-- Geri Dön Butonu ve hedefleyici_content -->
+                <div class="mt-3 mb-2">
+                    <a href="{{ url_for('welcome_options') }}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left"></i> Geri Dön
+                    </a>
+                </div>
+                {% block hedefleyici_content %}
+                    <p>Lütfen yukarıdaki seçeneklerden birini belirleyin.</p>
+                {% endblock %}
+            </div>
+        </div>
     </div>
-    <ul class="nav flex-column w-100">
-        <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
-                <i class="fas fa-book"></i> Kitaplarım
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
-                <i class="fas fa-tasks"></i> Görevlerim
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
-                <i class="fas fa-headphones"></i> Listening
-            </a>
-        </li>
-    </ul>
-</div>
-
-<!-- Ana İçerik -->
-<div class="planner-content" id="planner-content">
-    <!-- Geri Dön Butonu -->
-    <div class="mt-3 mb-2">
-        <a href="{{ url_for('welcome_options') }}" class="btn btn-outline-light">
-            <i class="fas fa-arrow-left"></i> Geri Dön
-        </a>
-    </div>
-    <h1>Planlayıcı</h1>
-    
-    {# This block will be used by specific hedefleyici sub-pages to insert their content #}
-    {% block hedefleyici_content %}
-        <p>Lütfen yukarıdaki seçeneklerden birini belirleyin.</p>
-    {% endblock %}
 </div>
 {% endblock %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('planner-sidebar');
-    const mainContent = document.getElementById('planner-content');
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('sidebar-collapsed');
-            if (mainContent) {
-                mainContent.classList.toggle('sidebar-collapsed');
-            }
-        });
-    }
-});
-</script> 
+{% block scripts %}
+<!-- Sayfa içi hamburger ve sidebar aç/kapa kodları kaldırıldı, ana js veya base.html'deki kod kullanılacak -->
+{% endblock %} 

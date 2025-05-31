@@ -3,6 +3,7 @@
 {% block title %}Listening{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
     body {
         background-color: transparent !important;
@@ -198,90 +199,80 @@
     .star-6 { top: 75%; left: 60%; animation: twinkle 4s infinite ease-in-out; }
     .star-7 { top: 85%; left: 90%; animation: twinkle 3s infinite ease-in-out; }
 
-    .planner-sidebar {
-        width: 250px;
-        background: rgba(35, 41, 70, 0.95);
-        min-height: 100vh;
+    .side-menu {
         position: fixed;
+        top: 56px;
         left: 0;
-        top: 0;
+        width: 250px;
+        min-height: calc(100vh - 56px);
         z-index: 1000;
-        transition: all 0.3s;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
-    .planner-sidebar .nav-link {
-        color: #fff;
-        padding: 0.8rem 1rem;
-        transition: all 0.3s;
-    }
-    .planner-sidebar .nav-link:hover {
-        background: rgba(255,255,255,0.1);
-        color: #30E8E8;
-    }
-    .planner-sidebar .nav-link.active {
-        background: rgba(48, 232, 232, 0.2);
-        color: #30E8E8;
-    }
-    .planner-sidebar .nav-link i {
-        margin-right: 10px;
-        width: 20px;
-        text-align: center;
-    }
-    .planner-content {
+    .main-content-area {
         margin-left: 250px;
-        padding: 20px;
-        transition: all 0.3s;
+        margin-top: 56px;
+    }
+    #wrapper {
+        display: block !important;
     }
 </style>
 {% endblock %}
 
 {% block page_content %}
-<div class="planner-sidebar" id="planner-sidebar">
-    <a href="{{ url_for('index') }}"
-       class="btn btn-outline-primary mb-4"
-       style="font-weight:bold; font-size:1.1rem; width: 90%; max-width: 220px; padding: 0.75rem 1.5rem; border-radius: 1.5rem; margin-top: 2.5rem;">
-        <i class="fas fa-list"></i> Tekrar Sistemine Geç
-    </a>
-    <h5 class="text-light mb-4 w-100 text-center">Planlayıcı</h5>
-    <ul class="nav flex-column w-100">
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('kitaplarim') }}">
-                <i class="fas fa-book"></i> Kitaplarım
+<div id="wrapper">
+    <div class="side-menu" id="sidebar-wrapper">
+        <div class="mb-3 text-center" style="margin-top: 4rem;">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
+                <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
             </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('gorevlerim') }}">
-                <i class="fas fa-tasks"></i> Görevlerim
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('listening') }}">
-                <i class="fas fa-headphones"></i> Listening
-            </a>
-        </li>
-    </ul>
-</div>
-<div class="planner-content" id="planner-content">
-    <div class="stars">
-        <div class="star star-1"></div>
-        <div class="star star-2"></div>
-        <div class="star star-3"></div>
-        <div class="star star-4"></div>
-        <div class="star star-5"></div>
-        <div class="star star-6"></div>
-        <div class="star star-7"></div>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
+                    <i class="fas fa-book"></i> Kitaplarım
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
+                    <i class="fas fa-tasks"></i> Görevlerim
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
+                    <i class="fas fa-headphones"></i> Listening
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
+                    <i class="fas fa-chart-bar"></i> Günlük Raporu Gör
+                </a>
+            </li>
+        </ul>
     </div>
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-body">
-                <h1>Listening</h1>
-                <p>This is the Listening section content.</p>
-                {# Specific content for Listening will go here #}
+    <div class="main-content-area" id="main-content-col">
+        <div class="inner-content-wrapper">
+            <div class="stars">
+                <div class="star star-1"></div>
+                <div class="star star-2"></div>
+                <div class="star star-3"></div>
+                <div class="star star-4"></div>
+                <div class="star star-5"></div>
+                <div class="star star-6"></div>
+                <div class="star star-7"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body">
+                        <h1>Listening</h1>
+                        <p>This is the Listening section content.</p>
+                        {# Specific content for Listening will go here #}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Sayfa içi hamburger ve sidebar aç/kapa kodları kaldırıldı, ana js veya base.html'deki kod kullanılacak -->
 {% endblock %} 
