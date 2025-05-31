@@ -473,21 +473,19 @@
             width: 100%;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: flex-start;
             margin: 0 !important;
             padding: 0 !important;
             transition: all 0.3s;
         }
-        .main-content-area .container,
-        .main-content-area .container-fluid {
-            margin: 0 !important;
-            padding: 0 !important;
+        .main-content-area.sidebar-collapsed {
+            margin-left: 0 !important;
         }
         .inner-content-wrapper {
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             padding: 32px 24px;
             box-sizing: border-box;
         }
@@ -773,10 +771,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Sidebar toggle butonu
             var sidebarToggle = document.getElementById('sidebarToggle');
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.getElementById('wrapper').classList.toggle('toggled');
+            var sidebar = document.getElementById('sidebar-wrapper');
+            var mainContent = document.getElementById('main-content-col');
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('sidebar-collapsed');
+                    if (mainContent) {
+                        mainContent.classList.toggle('sidebar-collapsed');
+                    }
                 });
             }
             
@@ -814,14 +816,11 @@
             
             // Mobil cihazlarda sidebar dışına tıklandığında sidebar'ı kapat
             document.addEventListener('click', function(event) {
-                var sidebar = document.getElementById('sidebar-wrapper');
-                var sidebarToggle = document.getElementById('sidebarToggle');
-                
-                if (window.innerWidth < 992 && 
-                    document.getElementById('wrapper').classList.contains('toggled') && 
-                    !sidebar.contains(event.target) && 
-                    event.target !== sidebarToggle) {
-                    document.getElementById('wrapper').classList.remove('toggled');
+                if (window.innerWidth < 992 && sidebar && sidebar.classList.contains('show') && !sidebar.contains(event.target) && event.target !== sidebarToggle) {
+                    sidebar.classList.remove('show');
+                    if (mainContent) {
+                        mainContent.classList.remove('sidebar-collapsed');
+                    }
                 }
             });
             
@@ -869,81 +868,282 @@
         </div>
     </div>
     
-    <!-- Footer -->
-    {% include 'components/footer.html' %}
+    <div id="miniPomodoro" class="mini-pomodoro" style="display: none;">
+        <div class="mini-pomodoro-header">
+            <span id="miniTimerMode">Odaklanma</span>
+            <div class="mini-pomodoro-controls">
+                <button id="miniToggleBtn" class="mini-btn"><i class="fas fa-play"></i></button>
+                <button id="miniMinimizeBtn" class="mini-btn"><i class="fas fa-minus"></i></button>
+                <button id="miniCloseBtn" class="mini-btn"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div id="miniTimerDisplay" class="mini-timer">25:00</div>
+        <div class="mini-progress">
+            <div id="miniProgressBar" class="mini-progress-bar"></div>
+        </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar-wrapper') || document.getElementById('planner-sidebar');
-        const mainContent = document.getElementById('main-content-col') || document.getElementById('planner-content');
-        if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('sidebar-collapsed');
-                if (mainContent) {
-                    mainContent.classList.toggle('sidebar-collapsed');
-                }
-            });
-        }
-        // Mobil cihazlarda sidebar dışına tıklandığında sidebar'ı kapat
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth < 992 && sidebar && sidebar.classList.contains('show') && !sidebar.contains(event.target) && event.target !== sidebarToggle) {
-                sidebar.classList.remove('show');
-                if (mainContent) {
-                    mainContent.classList.remove('sidebar-collapsed');
-                }
-            }
-        });
-    });
-    </script>
+    <div id="miniPomodoroMinimized" class="mini-pomodoro-minimized" style="display: none;">
+        <button id="miniRestoreBtn" class="mini-btn"><i class="fas fa-clock"></i></button>
+    </div>
+
     <style>
-    /* Sidebar aç/kapa animasyonu ve içerik dinamik hizalama */
-    .sidebar-wrapper {
-        width: 250px;
-        transition: margin-left 0.3s, width 0.3s;
-        min-height: 100vh;
-        background: #232946;
-    }
-    .sidebar-wrapper.sidebar-collapsed {
-        margin-left: -250px;
-    }
-    .main-content-area {
-        margin-left: 250px;
-        transition: margin-left 0.3s;
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        min-height: 100vh;
-    }
-    .main-content-area.sidebar-collapsed {
-        margin-left: 0 !important;
-    }
-    .inner-content-wrapper {
-        max-width: 1200px;
-        width: 100%;
-        padding: 32px 24px;
-        box-sizing: border-box;
-    }
-    /* İçerik ve container'larda margin/padding sıfırla */
-    .main-content-area,
-    .main-content-area .container,
-    .main-content-area .container-fluid {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    @media (max-width: 991.98px) {
-        .sidebar-wrapper {
+        /* Mini Pomodoro Styles */
+        .mini-pomodoro {
             position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            z-index: 1500;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            background: rgba(35, 41, 70, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(48, 232, 232, 0.3);
         }
+
+        .mini-pomodoro-minimized {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(35, 41, 70, 0.95);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(48, 232, 232, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mini-pomodoro-minimized:hover {
+            transform: scale(1.1);
+            background: rgba(48, 232, 232, 0.2);
+        }
+
+        .mini-pomodoro-minimized .mini-btn {
+            color: #30E8E8;
+            font-size: 1.2rem;
+                }
+
+        .mini-pomodoro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(48, 232, 232, 0.1);
+            border-bottom: 1px solid rgba(48, 232, 232, 0.2);
+    }
+
+        #miniTimerMode {
+            color: #30E8E8;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .mini-pomodoro-controls {
+        display: flex;
+            gap: 5px;
+    }
+
+        .mini-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+    }
+
+        .mini-btn:hover {
+            background: rgba(48, 232, 232, 0.2);
+            color: #30E8E8;
+        }
+
+        .mini-timer {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            padding: 10px;
+            text-shadow: 0 0 10px rgba(48, 232, 232, 0.3);
+        }
+
+        .mini-progress {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mini-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #30E8E8, #536976);
+            width: 0%;
+            transition: width 1s linear;
     }
     </style>
-    {% block scripts %}{% endblock %}
+
+    <script>
+        // Mini Pomodoro Functions
+        let miniTimerInterval = null;
+        let miniTimerTimeLeft = 0;
+        let miniTimerState = 'work';
+        let miniPomodoroCount = 0;
+        let miniTimerRunning = false;
+
+        function getPomodoroSettings() {
+            const defaults = { workDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, pomodorosUntilLongBreak: 4, autoStartBreaks: true, autoStartPomodoros: true, playSound: true, showNotifications: true };
+            try {
+                const settings = JSON.parse(localStorage.getItem('pomodoroSettings'));
+                return settings ? { ...defaults, ...settings } : defaults;
+            } catch { return defaults; }
+        }
+
+        function updateMiniTimer() {
+            const min = String(Math.floor(miniTimerTimeLeft / 60)).padStart(2, '0');
+            const sec = String(miniTimerTimeLeft % 60).padStart(2, '0');
+            document.getElementById('miniTimerDisplay').textContent = `${min}:${sec}`;
+            
+            // Update progress bar
+            const settings = getPomodoroSettings();
+            let totalTime;
+            if (miniTimerState === 'work') totalTime = settings.workDuration * 60;
+            else if (miniTimerState === 'shortBreak') totalTime = settings.shortBreakDuration * 60;
+            else totalTime = settings.longBreakDuration * 60;
+            
+            const progress = ((totalTime - miniTimerTimeLeft) / totalTime) * 100;
+            document.getElementById('miniProgressBar').style.width = `${progress}%`;
+        }
+
+        function toggleMiniTimer() {
+            if (miniTimerRunning) {
+                stopMiniTimer();
+            } else {
+                startMiniTimer();
+            }
+        }
+
+        function startMiniTimer() {
+            if (!miniTimerTimeLeft) {
+                const settings = getPomodoroSettings();
+                if (miniTimerState === 'work') miniTimerTimeLeft = settings.workDuration * 60;
+                else if (miniTimerState === 'shortBreak') miniTimerTimeLeft = settings.shortBreakDuration * 60;
+                else miniTimerTimeLeft = settings.longBreakDuration * 60;
+            }
+            
+            if (miniTimerInterval) clearInterval(miniTimerInterval);
+            miniTimerInterval = setInterval(() => {
+                if (miniTimerTimeLeft > 0) {
+                    miniTimerTimeLeft--;
+                    updateMiniTimer();
+                } else {
+                    clearInterval(miniTimerInterval);
+                    miniTimerInterval = null;
+                    miniTimerRunning = false;
+                    
+                    const settings = getPomodoroSettings();
+                    if (miniTimerState === 'work') {
+                        miniPomodoroCount++;
+                        if (miniPomodoroCount % settings.pomodorosUntilLongBreak === 0) {
+                            miniTimerState = 'longBreak';
+                        } else {
+                            miniTimerState = 'shortBreak';
+                        }
+                    } else {
+                        miniTimerState = 'work';
+                    }
+                    
+                    updateMiniTimerMode();
+                    notifyPomodoro();
+                    
+                    if (settings.autoStartBreaks && miniTimerState !== 'work') startMiniTimer();
+                    else if (settings.autoStartPomodoros && miniTimerState === 'work') startMiniTimer();
+                }
+            }, 1000);
+            
+            miniTimerRunning = true;
+            document.getElementById('miniToggleBtn').innerHTML = '<i class="fas fa-pause"></i>';
+        }
+
+        function stopMiniTimer() {
+            if (miniTimerInterval) clearInterval(miniTimerInterval);
+            miniTimerInterval = null;
+            miniTimerRunning = false;
+            document.getElementById('miniToggleBtn').innerHTML = '<i class="fas fa-play"></i>';
+        }
+
+        function updateMiniTimerMode() {
+            let modeText = '';
+            if (miniTimerState === 'work') modeText = 'Odaklanma';
+            else if (miniTimerState === 'shortBreak') modeText = 'Kısa Mola';
+            else modeText = 'Uzun Mola';
+            document.getElementById('miniTimerMode').textContent = modeText;
+        }
+
+        function showMiniPomodoro() {
+            document.getElementById('miniPomodoro').style.display = 'block';
+        }
+
+        function hideMiniPomodoro() {
+            document.getElementById('miniPomodoro').style.display = 'none';
+        }
+
+        function notifyPomodoro() {
+            const settings = getPomodoroSettings();
+            if (settings.playSound) {
+                const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c7b.mp3');
+                audio.play();
+            }
+            if (settings.showNotifications && 'Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    new Notification('Pomodoro Zamanı!', { body: miniTimerState === 'work' ? 'Çalışma zamanı!' : 'Mola zamanı!' });
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission();
+                }
+            }
+        }
+
+        function minimizeMiniPomodoro() {
+            document.getElementById('miniPomodoro').style.display = 'none';
+            document.getElementById('miniPomodoroMinimized').style.display = 'flex';
+        }
+
+        function restoreMiniPomodoro() {
+            document.getElementById('miniPomodoroMinimized').style.display = 'none';
+            document.getElementById('miniPomodoro').style.display = 'block';
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const miniToggleBtn = document.getElementById('miniToggleBtn');
+            const miniCloseBtn = document.getElementById('miniCloseBtn');
+            const miniMinimizeBtn = document.getElementById('miniMinimizeBtn');
+            const miniRestoreBtn = document.getElementById('miniRestoreBtn');
+            
+            miniToggleBtn.addEventListener('click', toggleMiniTimer);
+            miniCloseBtn.addEventListener('click', hideMiniPomodoro);
+            miniMinimizeBtn.addEventListener('click', minimizeMiniPomodoro);
+            miniRestoreBtn.addEventListener('click', restoreMiniPomodoro);
+
+            // Check if timer is running from localStorage
+            const savedState = JSON.parse(localStorage.getItem('pomodoroTimer'));
+            if (savedState && savedState.running) {
+                miniTimerState = savedState.timerState;
+                miniTimerTimeLeft = savedState.timerTimeLeft;
+                miniPomodoroCount = savedState.pomodoroCount;
+                showMiniPomodoro();
+                updateMiniTimerMode();
+                updateMiniTimer();
+                startMiniTimer();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_migrate import Migrate
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
+from sqlalchemy import func, and_, or_
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
@@ -294,32 +294,25 @@ def notifications():
     today = datetime.now().date()
     now = datetime.now()
 
-
-    # Soru Bildirimleri için verileri çek
+    # Soru Bildirimleri için verileri çek (her tekrar tarihi için ayrı ayrı say, and_ ve or_ ile)
     today_questions = Question.query.filter(
         Question.UserId == current_user.UserId,
         Question.IsCompleted == False,
         Question.IsHidden == False,
-        (
-            (Question.RepeatCount == 0 and Question.Repeat1Date is not None and db.func.cast(Question.Repeat1Date, db.Date) == today)
-            |
-            (Question.RepeatCount == 1 and Question.Repeat2Date is not None and db.func.cast(Question.Repeat2Date, db.Date) == today)
-            |
-            (Question.RepeatCount == 2 and Question.Repeat3Date is not None and db.func.cast(Question.Repeat3Date, db.Date) == today)
+        or_(
+            and_(Question.Repeat1Date != None, db.func.cast(Question.Repeat1Date, db.Date) == today),
+            and_(Question.Repeat2Date != None, db.func.cast(Question.Repeat2Date, db.Date) == today),
+            and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) == today)
         )
     ).all()
-
-
     past_questions = Question.query.filter(
         Question.UserId == current_user.UserId,
         Question.IsCompleted == False,
         Question.IsHidden == False,
-        (
-            (Question.RepeatCount == 0 and Question.Repeat1Date is not None and db.func.cast(Question.Repeat1Date, db.Date) < today)
-            |
-            (Question.RepeatCount == 1 and Question.Repeat2Date is not None and db.func.cast(Question.Repeat2Date, db.Date) < today)
-            |
-            (Question.RepeatCount == 2 and Question.Repeat3Date is not None and db.func.cast(Question.Repeat3Date, db.Date) < today)
+        or_(
+            and_(Question.Repeat1Date != None, db.func.cast(Question.Repeat1Date, db.Date) < today),
+            and_(Question.Repeat2Date != None, db.func.cast(Question.Repeat2Date, db.Date) < today),
+            and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) < today)
         )
     ).all()
 
@@ -613,9 +606,9 @@ def kitaplarim():
 @login_required
 def gorevlerim():
     # Aktif görevler
-    active_tasks = Task.query.filter_by(UserId=current_user.UserId, Status='new').order_by(Task.DueDate).all()
+    active_tasks = Task.query.filter_by(UserId=current_user.UserId, Status='new').filter(Task.Title != 'Serbest Çalışma').order_by(Task.DueDate).all()
     # Son tamamlanan görevler
-    completed_tasks = Task.query.filter_by(UserId=current_user.UserId, Status='completed').order_by(Task.CompletedAt.desc()).all()
+    completed_tasks = Task.query.filter_by(UserId=current_user.UserId, Status='completed').filter(Task.Title != 'Serbest Çalışma').order_by(Task.CompletedAt.desc()).all()
     return render_template(
         'gorevlerim.html',
         active_tasks=active_tasks,
@@ -1138,6 +1131,14 @@ def report():
         Task.UserId == current_user.UserId,
         db.text("CAST([TaskTimes].[StartTime] AS DATE) = :today")
     ).params(today=today).scalar() or 0
+    
+    # Pomodoro süreleri (Serbest Çalışma görevlerinden)
+    pomodoro_time = db.session.query(db.func.sum(TaskTime.Duration)).join(Task).filter(
+        Task.UserId == current_user.UserId,
+        Task.Title == 'Serbest Çalışma',
+        db.text("CAST([TaskTimes].[StartTime] AS DATE) = :today")
+    ).params(today=today).scalar() or 0
+    
     # Toplam görev sayısı (bugün tamamlanan + geciken + aktif)
     total_tasks = len(completed_tasks) + len(overdue_tasks)
     completion_rate = int((len(completed_tasks) / total_tasks) * 100) if total_tasks > 0 else 0
@@ -1146,7 +1147,7 @@ def report():
         report_date=today.strftime('%d.%m.%Y'),
         completed_count=len(completed_tasks),
         overdue_count=len(overdue_tasks),
-        total_time=total_time,
+        total_time=pomodoro_time,  # Pomodoro süresini gönder
         completed_tasks=completed_tasks,
         overdue_tasks=overdue_tasks,
         completion_rate=completion_rate,
@@ -1728,61 +1729,46 @@ def inject_notifications():
         if not current_user.is_authenticated:
             return dict(notifications=[], notification_count=0)
         today = datetime.now().date()
-        # Bugünkü sorular
-        today_questions = Question.query.filter(
+        from sqlalchemy import and_, or_
+        # Bugünkü tekrarlar
+        today_questions_count = Question.query.filter(
             Question.UserId == current_user.UserId,
             Question.IsCompleted == False,
             Question.IsHidden == False,
-            (
-                (Question.RepeatCount == 0 and Question.Repeat1Date is not None and db.func.cast(Question.Repeat1Date, db.Date) == today)
-                |
-                (Question.RepeatCount == 1 and Question.Repeat2Date is not None and db.func.cast(Question.Repeat2Date, db.Date) == today)
-                |
-                (Question.RepeatCount == 2 and Question.Repeat3Date is not None and db.func.cast(Question.Repeat3Date, db.Date) == today)
+            or_(
+                and_(Question.Repeat1Date != None, db.func.cast(Question.Repeat1Date, db.Date) == today),
+                and_(Question.Repeat2Date != None, db.func.cast(Question.Repeat2Date, db.Date) == today),
+                and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) == today)
             )
-        ).all()
-        today_count = len(today_questions)
+        ).count()
         # Geçmiş tekrarlar
-        past_questions = Question.query.filter(
+        past_questions_count = Question.query.filter(
             Question.UserId == current_user.UserId,
             Question.IsCompleted == False,
             Question.IsHidden == False,
-            (
-                (Question.RepeatCount == 0 and Question.Repeat1Date is not None and db.func.cast(Question.Repeat1Date, db.Date) < today)
-                |
-                (Question.RepeatCount == 1 and Question.Repeat2Date is not None and db.func.cast(Question.Repeat2Date, db.Date) < today)
-                |
-                (Question.RepeatCount == 2 and Question.Repeat3Date is not None and db.func.cast(Question.Repeat3Date, db.Date) < today)
+            or_(
+                and_(Question.Repeat1Date != None, db.func.cast(Question.Repeat1Date, db.Date) < today),
+                and_(Question.Repeat2Date != None, db.func.cast(Question.Repeat2Date, db.Date) < today),
+                and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) < today)
             )
-        ).all()
-        past_count = len(past_questions)
-        # Motive mesajları
-        motivation_messages = [
-            f"DEBUG: Bugün: {today_count}, Geçmiş: {past_count}",
-            "Her gün bir adım daha ileri! Bugünün hedeflerini tamamlamak için harekete geç.",
-            "Başarı, küçük adımların toplamıdır! Bugün de bir adım at.",
-            "Zorluklarla karşılaştığında vazgeçme, mola ver ve devam et!",
-            "Küçük adımlar büyük başarılar getirir! Bugün bir soruyu tamamla.",
-            "Bugün dünden daha iyi ol! Hedefine yaklaşıyorsun.",
-            "Başarı yolunda ilerliyorsun! Her tekrar seni güçlendirir.",
-            "Kendine inan, başarabilirsin!"
-        ]
-        import random
-        motivation = random.choice(motivation_messages)
+        ).count()
         notifications = []
-        if today_count > 0:
+        if today_questions_count > 0:
             notifications.append({
                 'type': 'Bugün',
-                'msg': f"Bugün çözmen gereken {today_count} soru var. Harikasın!"
+                'msg': f"Bugün çözülmesi gereken {today_questions_count} soru var."
             })
-        if past_count > 0:
+        if past_questions_count > 0:
             notifications.append({
                 'type': 'Gecikmiş',
-                'msg': f"{past_count} tekrarın gecikmiş, şimdi tam zamanı!"
+                'msg': f"Geçmişten {past_questions_count} sorunun var!"
             })
-        notifications.append({'type': 'Motive', 'msg': motivation})
-        notification_count = today_count + past_count
+        if not notifications:
+            notifications.append({
+                'type': 'Motivasyon',
+                'msg': 'Hiç bildirimin yok, harikasın!'
+            })
+        notification_count = today_questions_count + past_questions_count
         return dict(notifications=notifications, notification_count=notification_count)
     except Exception as e:
-        print('Context processor hatası:', e)
-        return dict(notifications=[], notification_count=0)
+        return dict(notifications=[{'type': 'Motivasyon', 'msg': 'Hiç bildirimin yok, harikasın!'}], notification_count=0)

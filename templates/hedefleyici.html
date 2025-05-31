@@ -47,35 +47,77 @@
         width: 250px;
         min-height: 100vh;
         z-index: 1000;
-        background: #232946;
+        background: linear-gradient(135deg, #2d225a 0%, #3a2e6e 60%, #232946 100%);
+        box-shadow: 2px 0 8px rgba(0,0,0,0.12);
+        border-right: 1px solid rgba(48,232,232,0.05);
         transition: left 0.3s;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
     }
     
     .sidebar-wrapper.sidebar-collapsed {
         left: -250px;
     }
     
-    .planner-sidebar .nav-link {
+    .sidebar-wrapper .btn {
+        font-weight: 600;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        border: 1.5px solid #30E8E8;
+        color: #30E8E8;
+        background: transparent;
+        transition: background 0.2s, color 0.2s;
+    }
+    
+    .sidebar-wrapper .btn:hover {
+        background: #30E8E8;
+        color: #232946;
+    }
+    
+    .sidebar-wrapper ul.nav {
+        margin-top: 1.5rem;
+        padding-left: 0;
+    }
+    
+    .sidebar-wrapper .nav-link {
         color: #fff;
-        padding: 0.8rem 1rem;
-        transition: all 0.3s;
+        font-size: 1.08rem;
+        font-weight: 500;
+        padding: 1rem 1.5rem 1rem 2.2rem;
+        border-left: 4px solid transparent;
+        border-radius: 0 16px 16px 0;
+        margin-bottom: 2px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        background: transparent;
+        position: relative;
     }
     
-    .planner-sidebar .nav-link:hover {
-        background: rgba(255,255,255,0.1);
-        color: #30E8E8;
-    }
-    
-    .planner-sidebar .nav-link.active {
-        background: rgba(48, 232, 232, 0.2);
-        color: #30E8E8;
-    }
-    
-    .planner-sidebar .nav-link i {
-        margin-right: 10px;
-        width: 20px;
+    .sidebar-wrapper .nav-link i {
+        margin-right: 12px;
+        font-size: 1.2rem;
+        width: 22px;
         text-align: center;
+    }
+    
+    .sidebar-wrapper .nav-link.active {
+        background: linear-gradient(90deg, rgba(48,232,232,0.18) 0%, rgba(48,232,232,0.08) 100%);
+        color: #30E8E8;
+        border-left: 4px solid #30E8E8;
+        font-weight: 700;
+        box-shadow: 0 2px 8px 0 rgba(48,232,232,0.04);
+    }
+    
+    .sidebar-wrapper .nav-link:hover {
+        background: rgba(48,232,232,0.10);
+        color: #30E8E8;
+        border-left: 4px solid #30E8E8;
+    }
+    
+    .sidebar-wrapper .nav-link:active {
+        background: rgba(48,232,232,0.18);
+        color: #30E8E8;
     }
     
     .main-content-area {
@@ -136,9 +178,8 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="container-fluid p-0 main-content">
     <div id="wrapper">
-        <div class="side-menu" id="sidebar-wrapper">
+    <div class="sidebar-wrapper" id="sidebar-wrapper">
             <div class="mb-3 text-center" style="margin-top: 4rem;">
                 <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
                     <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
@@ -187,7 +228,6 @@
                 {% block hedefleyici_content %}
                     <p>Lütfen yukarıdaki seçeneklerden birini belirleyin.</p>
                 {% endblock %}
-            </div>
         </div>
     </div>
 </div>
