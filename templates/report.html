@@ -1,149 +1,142 @@
-{% extends "base.html" %}
+{% extends "hedefleyici.html" %}
 
-{% block title %}Günlük Rapor - ReviseMe{% endblock %}
+{% block title %}Günlük Rapor{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{{ super() }}
 <style>
-.side-menu {
-    position: fixed;
-    top: 56px;
-    left: 0;
-    width: 250px;
-    min-height: calc(100vh - 56px);
-    z-index: 1000;
-}
-.main-content-area {
-    margin-left: 250px;
-    margin-top: 56px;
-}
+    /* Rapor sayfasına özel stiller */
+    h2 {
+        color: #30E8E8;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 15px rgba(48, 6, 75, 0.8), 0 0 20px rgba(48, 6, 75, 0.4);
+    }
+    
+    .card {
+        background-color: rgba(26, 20, 64, 0.8);
+        border: 1px solid rgba(106, 55, 181, 0.3);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        color: #FFF;
+        backdrop-filter: blur(5px);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(106, 55, 181, 0.3);
+        padding: 1rem 1.5rem;
+    }
+    
+    .bg-success {
+        background-color: rgba(40, 167, 69, 0.8) !important;
+    }
+    
+    .bg-danger {
+        background-color: rgba(220, 53, 69, 0.8) !important;
+    }
+    
+    .bg-info {
+        background-color: rgba(23, 162, 184, 0.8) !important;
+    }
+    
+    .bg-primary {
+        background-color: rgba(0, 123, 255, 0.8) !important;
+    }
+    
+    .bg-secondary {
+        background-color: rgba(108, 117, 125, 0.8) !important;
+    }
+    
+    .list-group-item {
+        background-color: rgba(26, 20, 64, 0.5);
+        border: 1px solid rgba(106, 55, 181, 0.2);
+        color: #EEE;
+    }
 </style>
 {% endblock %}
 
-{% block page_content %}
-<div class="container-fluid p-0 main-content">
-    <div id="wrapper">
-        <div class="side-menu" id="sidebar-wrapper">
-            <div class="mb-3 text-center" style="margin-top: 4rem;">
-                <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
-                    <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
-                </a>
-            </div>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
-                        <i class="fas fa-book"></i> Kitaplarım
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
-                        <i class="fas fa-tasks"></i> Görevlerim
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
-                        <i class="fas fa-headphones"></i> Listening
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
-                        <i class="fas fa-chart-bar"></i> Günlük Raporu Gör
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="main-content-area" id="main-content-col">
-            <div class="inner-content-wrapper">
-                <div class="container mt-4">
-                    <h2 class="mb-4 text-primary"><i class="fas fa-file-alt"></i> Günlük Görev Raporu ({{ report_date }})</h2>
-                    <!-- Özet Kutucuklar -->
-                    <div class="row mb-4">
-                        <div class="col-md-3 mb-2">
-                            <div class="card text-white bg-success text-center">
-                                <div class="card-body">
-                                    <div class="fw-bold">Tamamlanan Görevler</div>
-                                    <div style="font-size:2rem;">{{ completed_count }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="card text-white bg-danger text-center">
-                                <div class="card-body">
-                                    <div class="fw-bold">Geciken Görevler</div>
-                                    <div style="font-size:2rem;">{{ overdue_count }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="card text-white bg-info text-center">
-                                <div class="card-body">
-                                    <div class="fw-bold">Tamamlanma Oranı</div>
-                                    <div style="font-size:2rem;">%{{ completion_rate }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="card text-white bg-primary text-center">
-                                <div class="card-body">
-                                    <div class="fw-bold">Pomodoro Süresi</div>
-                                    <div style="font-size:2rem;">{{ total_time }} dk</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Detaylı Listeler -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-4">
-                                <div class="card-header bg-success text-white">Tamamlanan Görevler</div>
-                                <ul class="list-group list-group-flush">
-                                    {% for task in completed_tasks %}
-                                    <li class="list-group-item">{{ task.Title }}</li>
-                                    {% else %}
-                                    <li class="list-group-item text-muted">Bugün tamamlanan görev yok.</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card mb-4">
-                                <div class="card-header bg-danger text-white">Geciken Görevler</div>
-                                <ul class="list-group list-group-flush">
-                                    {% for task in overdue_tasks %}
-                                    <li class="list-group-item">{{ task.Title }} <span class="badge bg-danger ms-2">{{ task.DueDate.strftime('%d.%m.%Y %H:%M') }}</span></li>
-                                    {% else %}
-                                    <li class="list-group-item text-muted">Geciken görev yok.</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Toplam Çalışma Süresi ve Özet -->
-                    <div class="card mt-4">
-                        <div class="card-header bg-secondary text-white">Özet</div>
-                        <div class="card-body">
-                            <ul>
-                                <li><b>{{ report_date }}</b> tarihinde <b>{{ completed_count }}</b> görev tamamladın.</li>
-                                <li><b>{{ overdue_count }}</b> görevini ise henüz tamamlamadın.</li>
-                            </ul>
-                            {% if completed_count == 0 and overdue_count > 0 %}
-                                <div class="alert alert-warning mt-3">Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!</div>
-                            {% elif completed_count > 0 and overdue_count == 0 %}
-                                <div class="alert alert-success mt-3">Tebrikler! Bugün tüm görevlerini tamamladın!</div>
-                            {% elif completed_count > 0 and overdue_count > 0 %}
-                                <div class="alert alert-info mt-3">Bazı görevleri tamamladın, bazıları ise gecikti. Yarın daha iyisi için devam et!</div>
-                            {% else %}
-                                <div class="alert alert-secondary mt-3">Bugün için görev bulunmuyor.</div>
-                            {% endif %}
-                        </div>
-                    </div>
+{% block hedefleyici_content %}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-file-alt"></i> Günlük Görev Raporu ({{ report_date }})</h2>
+    
+    <!-- Özet Kutucuklar -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-success text-center">
+                <div class="card-body">
+                    <div class="fw-bold">Tamamlanan Görevler</div>
+                    <div style="font-size:2rem;">{{ completed_count }}</div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-danger text-center">
+                <div class="card-body">
+                    <div class="fw-bold">Geciken Görevler</div>
+                    <div style="font-size:2rem;">{{ overdue_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-info text-center">
+                <div class="card-body">
+                    <div class="fw-bold">Tamamlanma Oranı</div>
+                    <div style="font-size:2rem;">%{{ completion_rate }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card text-white bg-primary text-center">
+                <div class="card-body">
+                    <div class="fw-bold">Pomodoro Süresi</div>
+                    <div style="font-size:2rem;">{{ total_time }} dk</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detaylı Listeler -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">Tamamlanan Görevler</div>
+                <ul class="list-group list-group-flush">
+                    {% for task in completed_tasks %}
+                    <li class="list-group-item">{{ task.Title }}</li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Bugün tamamlanan görev yok.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">Geciken Görevler</div>
+                <ul class="list-group list-group-flush">
+                    {% for task in overdue_tasks %}
+                    <li class="list-group-item">{{ task.Title }} <span class="badge bg-danger ms-2">{{ task.DueDate.strftime('%d.%m.%Y %H:%M') }}</span></li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Geciken görev yok.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toplam Çalışma Süresi ve Özet -->
+    <div class="card mt-4">
+        <div class="card-header bg-secondary text-white">Pomodoro Özeti</div>
+        <div class="card-body">
+            <ul>
+                <li>Bugün toplam <b>{{ total_time }}</b> dakika Pomodoro yaptın!</li>
+            </ul>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Sayfa içi hamburger ve sidebar aç/kapa kodları kaldırıldı, ana js veya base.html'deki kod kullanılacak -->
+{{ super() }}
 {% endblock %} 

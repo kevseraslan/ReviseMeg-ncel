@@ -1,29 +1,11 @@
-{% extends 'base.html' %}
+{% extends "hedefleyici.html" %}
 
 {% block title %}Listening{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{{ super() }}
 <style>
-    body {
-        background-color: transparent !important;
-        position: relative;
-    }
-    
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url('/static/images/pastel-background.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        z-index: -1;
-    }
-    
+    /* Listening sayfasına özel stiller */
     h1 {
         color: #30E8E8;
         font-size: 2.5rem;
@@ -45,7 +27,7 @@
     .card:hover {
         transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(46, 205, 200, 0.3);
-        border-color: var(--accent-turquoise);
+        border-color: #30E8E8;
     }
     
     .card-title {
@@ -166,175 +148,40 @@
         color: #CCC;
     }
     
-    /* Simüle edilmiş yıldızlar */
-    @keyframes twinkle {
-        0% { opacity: 0.3; }
-        50% { opacity: 1; }
-        100% { opacity: 0.3; }
-    }
-    
-    .stars {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-    }
-    
-    .star {
-        position: absolute;
-        width: 2px;
-        height: 2px;
-        background-color: white;
-        border-radius: 50%;
-    }
-    
-    .star-1 { top: 10%; left: 20%; animation: twinkle 3s infinite ease-in-out; }
-    .star-2 { top: 15%; left: 50%; animation: twinkle 4s infinite ease-in-out; }
-    .star-3 { top: 25%; left: 80%; animation: twinkle 5s infinite ease-in-out; }
-    .star-4 { top: 40%; left: 10%; animation: twinkle 4.5s infinite ease-in-out; }
-    .star-5 { top: 60%; left: 30%; animation: twinkle 3.5s infinite ease-in-out; }
-    .star-6 { top: 75%; left: 60%; animation: twinkle 4s infinite ease-in-out; }
-    .star-7 { top: 85%; left: 90%; animation: twinkle 3s infinite ease-in-out; }
-
-    .sidebar-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 250px;
-        min-height: 100vh;
-        z-index: 1000;
-        background: linear-gradient(135deg, #2d225a 0%, #3a2e6e 60%, #232946 100%);
-        box-shadow: 2px 0 8px rgba(0,0,0,0.12);
-        border-right: 1px solid rgba(48,232,232,0.05);
-        transition: left 0.3s;
-        display: flex;
-        flex-direction: column;
-    }
-    .sidebar-wrapper .btn {
-        font-weight: 600;
-        font-size: 1.1rem;
-        border-radius: 8px;
-        border: 1.5px solid #30E8E8;
-        color: #30E8E8;
-        background: transparent;
-        transition: background 0.2s, color 0.2s;
-    }
-    .sidebar-wrapper .btn:hover {
-        background: #30E8E8;
-        color: #232946;
-    }
-    .sidebar-wrapper ul.nav {
-        margin-top: 1.5rem;
-        padding-left: 0;
-    }
-    .sidebar-wrapper .nav-link {
+    .btn-success {
+        background: linear-gradient(135deg, #30E8E8, #6A37B5);
+        border: none;
         color: #fff;
-        font-size: 1.08rem;
-        font-weight: 500;
-        padding: 1rem 1.5rem 1rem 2.2rem;
-        border-left: 4px solid transparent;
-        border-radius: 0 16px 16px 0;
-        margin-bottom: 2px;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        background: transparent;
-        position: relative;
+        font-weight: bold;
     }
-    .sidebar-wrapper .nav-link i {
-        margin-right: 12px;
-        font-size: 1.2rem;
-        width: 22px;
-        text-align: center;
-    }
-    .sidebar-wrapper .nav-link.active {
-        background: linear-gradient(90deg, rgba(48,232,232,0.18) 0%, rgba(48,232,232,0.08) 100%);
-        color: #30E8E8;
-        border-left: 4px solid #30E8E8;
-        font-weight: 700;
-        box-shadow: 0 2px 8px 0 rgba(48,232,232,0.04);
-    }
-    .sidebar-wrapper .nav-link:hover {
-        background: rgba(48,232,232,0.10);
-        color: #30E8E8;
-        border-left: 4px solid #30E8E8;
-    }
-    .sidebar-wrapper .nav-link:active {
-        background: rgba(48,232,232,0.18);
-        color: #30E8E8;
-    }
-    .main-content-area {
-        margin-left: 250px;
-        margin-top: 56px;
-        transition: margin-left 0.3s;
-    }
-    .main-content-area.sidebar-collapsed {
-        margin-left: 0;
-    }
-    #wrapper {
-        display: block !important;
-    }
-    .inner-content-wrapper {
-        max-width: 1290px;
-        width: 100%;
-        margin: 0 auto;
-        padding: 32px 24px;
-        box-sizing: border-box;
+    
+    .btn-success:hover {
+        background: linear-gradient(135deg, #6A37B5, #30E8E8);
     }
 </style>
 {% endblock %}
 
-{% block page_content %}
-<div id="wrapper">
-    <div class="sidebar-wrapper" id="sidebar-wrapper">
-        <div class="mb-3 text-center" style="margin-top: 4rem;">
-            <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
-                <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
-            </a>
-        </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
-                    <i class="fas fa-book"></i> Kitaplarım
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
-                    <i class="fas fa-tasks"></i> Görevlerim
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
-                    <i class="fas fa-headphones"></i> Listening
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
-                    <i class="fas fa-chart-bar"></i> Günlük Raporu Gör
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="main-content-area" id="main-content-col">
-        <div class="inner-content-wrapper">
-            <div class="stars">
-                <div class="star star-1"></div>
-                <div class="star star-2"></div>
-                <div class="star star-3"></div>
-                <div class="star star-4"></div>
-                <div class="star star-5"></div>
-                <div class="star star-6"></div>
-                <div class="star star-7"></div>
-            </div>
-            <div class="container-fluid">
-                <div class="card">
-                    <div class="card-body">
-                        <h1>Listening</h1>
-                        <p>This is the Listening section content.</p>
-                        {# Specific content for Listening will go here #}
+{% block hedefleyici_content %}
+<div class="container-fluid p-0">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h1>Listening</h1>
+                    <p>Her gün 2 yeni video! İzlediklerini işaretle, İngilizceni geliştir.</p>
+                    <div class="row" id="listening-videos">
+                        {% for vid in video_ids %}
+                        <div class="col-md-6 mb-4 video-card" data-video-id="{{ vid }}">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="ratio ratio-16x9 mb-3">
+                                        <iframe src="https://www.youtube.com/embed/{{ vid }}" allowfullscreen></iframe>
+                                    </div>
+                                    <button class="btn btn-success mark-watched" data-id="{{ vid }}">İzledim</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -344,5 +191,30 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Sayfa içi hamburger ve sidebar aç/kapa kodları kaldırıldı, ana js veya base.html'deki kod kullanılacak -->
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.mark-watched').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-id');
+                fetch('/mark_listening_watched', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    body: JSON.stringify({ video_id: videoId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                        // Kartı ekrandan kaldır
+                        this.closest('.video-card').remove();
+                        } else {
+                        alert('Bir hata oluştu: ' + (data.error || 'Bilinmeyen hata'));
+                        }
+                    });
+            });
+        });
+    });
+</script>
 {% endblock %} 

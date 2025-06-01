@@ -462,24 +462,30 @@
             width: 250px;
             min-width: 250px;
             max-width: 250px;
-            transition: margin-left 0.3s, width 0.3s;
+            transition: all 0.3s ease;
             background: #232946;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            height: calc(100vh - 56px);
+            z-index: 1030;
         }
         .sidebar-wrapper.sidebar-collapsed {
             margin-left: -250px;
         }
         .main-content-area {
             flex: 1 1 0%;
-            width: 100%;
+            width: calc(100% - 250px);
             min-height: 100vh;
             display: flex;
             justify-content: flex-start;
             align-items: flex-start;
-            margin: 0 !important;
+            margin-left: 250px !important;
             padding: 0 !important;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
         .main-content-area.sidebar-collapsed {
+            width: 100% !important;
             margin-left: 0 !important;
         }
         .inner-content-wrapper {
@@ -492,10 +498,14 @@
         @media (max-width: 991.98px) {
             .sidebar-wrapper {
                 position: fixed;
-                top: 0;
+                top: 56px;
                 left: 0;
-                height: 100vh;
+                height: calc(100vh - 56px);
                 z-index: 1500;
+            }
+            .main-content-area {
+                width: 100% !important;
+                margin-left: 0 !important;
             }
         }
     </style>
@@ -773,13 +783,27 @@
             var sidebarToggle = document.getElementById('sidebarToggle');
             var sidebar = document.getElementById('sidebar-wrapper');
             var mainContent = document.getElementById('main-content-col');
+            
             if (sidebarToggle && sidebar) {
                 sidebarToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('sidebar-collapsed');
                     if (mainContent) {
                         mainContent.classList.toggle('sidebar-collapsed');
                     }
+                    
+                    // Kullanıcı tercihini local storage'a kaydet
+                    const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
                 });
+                
+                // Sayfa yüklendiğinde kullanıcı tercihini kontrol et
+                const savedState = localStorage.getItem('sidebarCollapsed');
+                if (savedState === 'true') {
+                    sidebar.classList.add('sidebar-collapsed');
+                    if (mainContent) {
+                        mainContent.classList.add('sidebar-collapsed');
+                    }
+                }
             }
             
             // Tema değiştirme butonu
@@ -803,43 +827,17 @@
             
             // Mobil cihazlarda sidebar'ı otomatik kapat
             function checkWidth() {
-                if (window.innerWidth < 992) {
-                    document.getElementById('wrapper').classList.remove('toggled');
-                } else {
-                    document.getElementById('wrapper').classList.add('toggled');
+                if (window.innerWidth < 992 && sidebar) {
+                    sidebar.classList.add('sidebar-collapsed');
+                    if (mainContent) {
+                        mainContent.classList.add('sidebar-collapsed');
+                    }
                 }
             }
             
             // Sayfa yüklendiğinde ve boyutu değiştiğinde kontrol et
             window.addEventListener('resize', checkWidth);
             checkWidth();
-            
-            // Mobil cihazlarda sidebar dışına tıklandığında sidebar'ı kapat
-            document.addEventListener('click', function(event) {
-                if (window.innerWidth < 992 && sidebar && sidebar.classList.contains('show') && !sidebar.contains(event.target) && event.target !== sidebarToggle) {
-                    sidebar.classList.remove('show');
-                    if (mainContent) {
-                        mainContent.classList.remove('sidebar-collapsed');
-                    }
-                }
-            });
-            
-            // Dropdown menülerin animasyonu
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            dropdownElementList.map(function (dropdownToggleEl) {
-                dropdownToggleEl.addEventListener('click', function(e) {
-                    var parent = this.closest('.dropdown');
-                    var menu = parent.querySelector('.dropdown-menu');
-                    
-                    if (menu) {
-                        if (menu.classList.contains('show')) {
-                            menu.classList.remove('animated--fade-in');
-                        } else {
-                            menu.classList.add('animated--fade-in');
-                        }
-                    }
-                });
-            });
         });
     })();
     </script>
@@ -847,11 +845,6 @@
 <body style="padding-top: 56px;">
     <!-- Header ve Navbar -->
     {% include 'components/navbar.html' %}
-    
-    <!-- Sidebar Toggle Button (Hamburger) -->
-    {# <button id="sidebarToggle" class="btn btn-primary position-fixed" style="top: 15px; left: 15px; z-index: 2000;">
-        <i class="fas fa-bars"></i>
-    </button> #}
     
     <div class="container-fluid p-0 main-content">
         <div id="wrapper">
@@ -868,7 +861,7 @@
         </div>
     </div>
     
-    <div id="miniPomodoro" class="mini-pomodoro" style="display: none;">
+    <div id="miniPomodoro" class="mini-pomodoro" style="display: none; min-height: 120px; padding-bottom: 10px; overflow: visible !important;">
         <div class="mini-pomodoro-header">
             <span id="miniTimerMode">Odaklanma</span>
             <div class="mini-pomodoro-controls">
@@ -898,7 +891,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
-            z-index: 1000;
+            z-index: 3000 !important;
             overflow: hidden;
             transition: all 0.3s ease;
             border: 1px solid rgba(48, 232, 232, 0.3);
@@ -914,7 +907,7 @@
             border-radius: 50%;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
-            z-index: 1000;
+            z-index: 3000 !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1145,5 +1138,6 @@
             }
         });
     </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

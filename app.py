@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, render_template_string
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, render_template_string, session
 from flask_migrate import Migrate
 
 from flask_sqlalchemy import SQLAlchemy
@@ -500,9 +500,9 @@ def register():
             # Form verilerini al
             username = request.form.get('username')
             password = request.form.get('password')
-            password_confirm = request.form.get('password_confirm')
-            first_name = request.form.get('first_name')
-            last_name = request.form.get('last_name')
+            confirm_password = request.form.get('confirm_password')
+            first_name = request.form.get('name')
+            last_name = request.form.get('surname')
             email = request.form.get('email')
             class_level = request.form.get('class_level')
             year_of_birth = request.form.get('year_of_birth')
@@ -527,7 +527,7 @@ def register():
                 return redirect(url_for('register'))
 
             # Şifre kontrolü
-            if password != password_confirm:
+            if password != confirm_password:
                 flash('Şifreler eşleşmiyor.', 'error')
                 return redirect(url_for('register'))
 
@@ -605,23 +605,127 @@ def kitaplarim():
 @app.route('/gorevlerim')
 @login_required
 def gorevlerim():
+    filter_type = request.args.get('filter', 'all')
     # Aktif görevler
     active_tasks = Task.query.filter_by(UserId=current_user.UserId, Status='new').filter(Task.Title != 'Serbest Çalışma').order_by(Task.DueDate).all()
     # Son tamamlanan görevler
     completed_tasks = Task.query.filter_by(UserId=current_user.UserId, Status='completed').filter(Task.Title != 'Serbest Çalışma').order_by(Task.CompletedAt.desc()).all()
+    if filter_type == 'completed':
+        tasks = completed_tasks
+    else:
+        tasks = active_tasks
     return render_template(
         'gorevlerim.html',
         active_tasks=active_tasks,
         completed_tasks=completed_tasks,
+        tasks=tasks,
+        filter=filter_type,
         section='hedefleyici',
         now=datetime.now()
     )
 
+# Listening video linkleri (YouTube video ID'leri)
+LISTENING_VIDEO_IDS = [
+    'we4KiShNjlA', '26PrgjTboVQ', '2USh8OmgiJE', 'Y681hXWwhQY', 'wkjSBC-_bDA', 'FZDImEiPgMk',
+    'g8q-Nq-ajx8', '1iHeeMlOsyc', 'HZd53TJpmoQ', 'JjESWHykTJQ', '5R3WdBE1-JM', 'zsOnAHAY6to',
+    'fG7dJ6A3l7w', 'Mqnlb_yj3bY', 'Joc4kJ4M1Bk', 'oTPZWpQ9pbA', '7F1iJZr-p4E', '_5siHrpPnmw',
+    'uxtXEuK05-w', 'j8d5kkKfDbo', 'FKwmUNffu7M', 'DsQMLrPdLf8', 'V2eW5jGQe8I', 'qoNRZKgLDhg',
+    'vq2x7k_nofw', 'KkrhHUeMjIU', 'h_pvijqmolQ', 'xy27CfuFtJE', 'R_0E8HBxYN8', 'iKzpnVWdZ70',
+    'mpxwlItsDA8', 'u6QrbYDsj1g', '7BIp53who2A', 'KLz5u2pH-yM', 'ybQORSQWWdc', '4YHtcINPkjM',
+    'UIg6n0ypaHw', 'vP3VOKBcloo', 'TVHePsQLa3w', 'FjU9qyTZ_OU', 'WjFQIP8w5Jw', 'p0SUyXLS-ME',
+    'j2PdEQpu5js', 'xGhbhWUqL-w', 's1HxJVusR2w', '3hwEplr-g5w', 'Kmc7TtKkTs4', 'Y5sSvaAKF90',
+    'xltewJgQVV0', '8p7HytjrKj4', 'rvZWLTtEyoU', 'Xbv4IIqwW-4', '2zFyz6uO9-0', 'Fez57g8jMNM',
+    'wlEuiYq8tcM', 'vdS3QBy9WeU', 'Egn-pNaM27U', 'H4yeMxZ07zY', 'SiQInf3_NIE', 'WsKg6HsoDaw',
+    'rQK37u961Eo', 'CcMhB1DD-Gg', 'UEH3oRSgVXQ', '8P_ya85lxzw', '1lNbOH-cvl8', 'MY1Rk1polgM',
+    'Tp8xIgyyK7I', 'HZi9ls9emUE', 'WunqZ9SF4hU', 'uhfVT5iAtMM', 'Ag7-U4ga9mA', '5kr5ADrMeYU',
+    'tieXTqc15rE', 'UhR-Bn4UII0', 'Oq2bnLC_DXU', 'StEB_wntlZ0', 'tHZRXN_pVi8', 'uEgpgnKNF9Q',
+    'TejfD82oLfU', 'rWHGKGS7zSc', 'bywWgD9yJq0', 'JZ_EV9DPtt0', 'VkLIUXjNwYc', 'mLYwM-kdbwM',
+    '8XOA3-XwTaQ', 'jDqsNK1hmM8', 'mv3Fx8-O9co', 'v5p7WY9nOJM', 'c5Ppkvg7xHI', 'ACG6qr4waWU',
+    'eEBc_QB5VIQ', 'jwAoLZXFLjo', 'bRzP7hwIGWE', 'lC_lCOxR5e0', 'Y3vHuw97AiA', 'DdOburEdIPg',
+    'tyvMjvvrq74', 'bJq9kPc_-tw', 'YY1mN_ibteU', 'WBLuy_YU-Zw', 'AJRqLvAZp4Q', '6R0Wy4kwxes',
+    'K-9-dtJpZ9c', 'wCgPjVzREqs', 'Z51Q29u4CWc', 'zFpk5FsNndM', 'bizx7atWYkQ', 'vBiBiCdlXes',
+    'yz4a2soLDl4', 'WeNuLW5uPGc', 'tD-6xHAHrQ4', 'af7VzZTzmlg', '0YpwaYUGF94', 'DaW-Kha9qAM',
+    'AlrXqakHPuk', 'rTSSchYtAXk', 'eXp4Mt1S8Lg', 'Q6MAcmJdYdA', 'MwqWPzDK6Hs', 'dRgwAU7Y4yY',
+    '2OjMuGloIRo', 'mEoSi6l99OE', 'OHExziy0xLY', 'TyC762eWXzo', 'jdu6GCU42zU', 'wNJQPn-SLk8',
+    'Dk8AAU_UdVk', 'el2iTDgF0y8', 'fgZl4Mp0Y_w', 'VZcW--Wi7mY', 'EiCs_8ZKVJc', '3-icphihD6Y',
+    'wAV-vbHLn3Q', 'sm6EtQg-hxw', 'KB4Mn5XHdMc', 'yoFhTmWrYz8', 'fFLLQEFgK6s', 'wgO7yK7NZpg',
+    'JFIhleM0Kbo', 'fJoCs5Z_QvE', 'MVGl4QJTZqY', 'ziimjZ-OrgU', 'Eofp060BEnw', 'rCh9MQibJ3c',
+    'nQrS3-L9id4', 'kglKCEGytsk', 'oviVRMuVgAs', 'KFajmtdj-J0', 'LrZGtTuMpk8', 'O3tp5Y9lH88',
+    'a66Gx6c-ZeE', 'luh9xTJ7ExM', 'l1DLZhZXsw0', '9hus12iCyL8', '5IqtP2fzNlA', 'pIOkrFZ-D1w',
+    '5ZQ65RbsAB8', 'Dd3QvqyT2x4', '0VPwGqiWT04', 'w4BvAaL1S3g', 'hGzKWfQOKeQ', '5pxlzf0Tz_0',
+    'NODkUzmamP8', 'NhVXCMjhmho', 'fGeQH4_lH3Q', 'l66TJNGKQFQ', 'P0siKVerEUg', 'ZDzklx1T6E0',
+    'ipktRrpIjz8', 'Nb7wVCJ68YY', '6Y3rL9LVV9w', '9ifQ3xRz4hM', 'nNlS1lWEiQA', 'k-pl1DwhIFk',
+    'Zho2dPAiZ74', '16hzMhzgaM0', 'aq1snwtQUQ4', '9g5X11dH-Lc', 'N3cE1lO8aCE', 'fWzD45xDQDo',
+    'DxR2waii1Ck', 'rqPeFokY-T8', 'XMfNMnH8KyQ', '9EKvO6tu7a0', 'rT_zp4KQ4p8', 'MmODCOXX_2c',
+    'Y7QvqbwRjLQ', 'fKg0nLaQzn4', 'tYKm_8dXmMc', 'WaQWL1Qr9i8', 'SYh7YSKxL6U', 'HMKqVxiPFVI',
+    '_zmMl7T8164', 'r5iFFBpFSlU', 'hM4HYNE32wQ', 'PL90RepTkhk', '1niTruE-PNs', '7ZJxdmEKn0Q',
+    'AQSGyV0rh5Y', 't2J-_-v-Spw', 'Z2xcl93o7F0', 'C4vC-Y3USfk', 'a5dR3olXGWU', 'H5BVbrZ64bQ',
+    'wcEgBAORLM4', 'A2lIdSnv1Vw', '91liS87P9CY', 'hlsBs3XSDUM', 'XGx13d-QdIM', 'jnFeXaL02Fg',
+    'eoXv4JgwjeM', 'RN6HGltVp2A', '8yzy7ucYcII', 'mxwJsvMj7JA', '31FjeWvLIxM', '7L2oJIob6X0',
+    'B_TWPas7ZAw', 'WKmsxJkJCqM', 'Iigy0LpJjN4', '5w-zLrlTcY4', 'HKfDfWrCwEA', 'drWlSGryMkY',
+    'jkMW1qtz01c', '4KcXgXgSxDI', 'P2UOO6L8rio', 'NGY-HJ_l35E', '8E8DQnmd4zs', 'X5YjfOKBffU',
+    'x4HNOP6Ko6Y', '_WHCjv1MRmM', 'd6BGuntMwCM', 'CNoggf2Ibek', '0emVXTaESvs', 'EcTdPfg4wO8',
+    'AfNSMykrG1I', 'lJMPosxMV2M', 'OQAS9pqC8V4', '9ry87N2tC_k', 'aA35kVsHuCo', 'jp1FCIQUBkw',
+    'xf2RF9vx-G4', 'MrCklBFENkQ', 'COB_5wL_xv4', 'vHtvi6EtGkw', 'WAaAoXsIHvI', '2Z5iHh2omRA',
+    'CRFHPkLgAKc', 'RS4MrptnnP8', 'Fxh3HeJvRhw', 'JaGXfJBx0BM', '2K2gB8b7qUw', 'Cn0oOdwryPo',
+    'LC_3i_EPd6s', '9mIYleesmSU', 'gu_GfdJpdsA', 'B1hl-eRpGmI', '4pDImFxHNuY', 'gJ0BSnuX1GA',
+    'dJZ9CSbGueU', 'atPNphv-NEI', 'cSlPuxN_yws', '1jgT2Wgsox8', 'iNRqZNXsB8k', 'XqZoDfJwNKE',
+    'jO8d0wwXyk8', 'WVPcKah4CbA', 'lZIacnbb52Q', 'g2Ki5GeMevU', 's94XlBnJwZU', 'HTdQ8bDEhAQ',
+    'Tcf1dbiWKsk', 'f0FkoUFJUo0', 'WbAeqhkL8aA', 'savzorNB_sI', 'gfnyMyCZjqA', '0R9NLQM4ZKA',
+    'fVpEwW_4Yt4', 'cr2TXucwjVk', 'DvBWBSl2DKA', 'WcION1-0_VI', 'naB_3XYRtew', 'xZxmMQCZsu4',
+    '0UOdAKVdbMo', '-aLUbUMVYAc', 'O3vGss0ELfg', 'iOao1dfGP2s', '8tFbax73NtA', 'hmnW6F3-KqE',
+    'Dfc3ZqVwrNc', 'HZpEq-r7_Nw', 'obpKWRcXezA', '9mQkGyApBX0', '3DL3Htt8vck', 'kjVd228S-yQ',
+    'lVFXbzzm1Bw', 'AhgRjqgrgkk', 'WUcNXALk_fQ', 'x4xlQTP-XDU', '0E9KurvLzqE', '-Bi-T52-F-s',
+    'IKDqlHCOxrg', 'GUGtU7Ii1yk', 'NFZH67BgO5c', 'ZRkEwwOyTa4', 'l22DvDwD6Ow', 'oRhVmbfy1sY',
+    '4yiVfwDkntQ', 'o2pdhO76ld4', 'MgoZwkSXzGw', 'ktgDXNML2uI', 'BCzbEQlk3to', 'RNZwLILj0Uw',
+    'Engjh-aEevc', '2FqYQaLwWLo', 'adFreL6VqQY', 'ypXp6-MT_Co', 'k_qKbYrOq98', 'o8LAh3AUyXs',
+    'vezrsZv5UcE', 'pfJ15WGdoWo', 'as-vRWOmJWU', 'Umb9e-L2DVg', 'GdGcE_-_T8Y', 'NVgpf-SFs0g',
+    'aMe78rHCzF0', 'K-Nps59NeBA', 'EBAc4PIQC2Y', 'iHLgOqZ5CXc', '_q8geBY3vPA', 'KNhwmHq1asM',
+    'dKUwijDI2KE', 'NwPkZgd6L-o', 'hfNU4h38Iis', 'cMjvx9GfaO0', 'uiSNeh10yPc', 'ObuDxIh89V8',
+    'NLj72KSNZoo', 'tOxD9PEH8DU', 'WW4RnT1YuLg', 'URw3ITsBU6s', 'BvNNuSz-EFw', 'z3OykfkE_R0',
+    'ZxTpScOY8c4', 'kU65ZNNOPc4', 'gcuCCv-n7YQ', 'RwBO6Hi5FvE', 'Xv5i11wmpQM', 'glK2V-7DJD8',
+    'u6Ke0rdjKEg', '9bSMwNO_OCY', '3nw9cWGmI5E', 'xg7OWeR7tr4', '_StSUVR6_ok', 'Ac67KPcSqsM',
+    'mQ8P4E7LKqI', 'n5p85sRPTLo', 'uoujHpVJSe8', 'ibQx65L7mcI', 'bLkvQrqkVCI', 'izx0SSLoTls',
+    'G_a3ILspt-w', 'Jde-H7WW7BQ', '3fBxa1IEb74', 'xwbAWiqMuNE', 'Dn-uY9q4rLs', 'u6GOoQnJicg',
+    '0cg27Y1atuI', 'Nn0QvidINiA', 'ojgogr0St9g', 'tnmgIUxfFE4', '6FY51RKsK3c', '1MqRALnIvWY',
+    'SmKTe9okerg', 'gdIskHlqRwc', '69o1qyxZBuw', '360sNcECglc', 'LXw2xdWqkS0', 'lvhEPmiaeMs',
+    'NrU4Cx2gAoU', 'l5dsQB0rqms', '-yJj6rYX6H0', 'uziFF8NSxaQ', 'wMQjmpVgor8', 'AhoslePC6yI',
+    'hCMKloIx8vk', '95yoKdm5sMk', 'DD9IbPnCxMM', 'z2JsYmGmF8E', 'Pzq2slM4Wu4', 'bq9U_3exOLo',
+    'x4qC_ed3dRg', 'NUHIoZFuDAw', 'l31dAwfYjhI', 'RTi-D3ykhqM', 'aOiuSsnWEik', 'bGsUkpvV9_w',
+    'KaFF0__DnoM'
+]
+
+def get_today_video_ids():
+    watched = session.get('watched_listening_videos', [])
+    available = [vid for vid in LISTENING_VIDEO_IDS if vid not in watched]
+    if len(available) < 2:
+        # Tüm videolar izlendiyse sıfırla
+        session['watched_listening_videos'] = []
+        available = LISTENING_VIDEO_IDS.copy()
+    # Her gün aynı 2 video gelsin diye tarihi hashle
+    today = datetime.now().strftime('%Y-%m-%d')
+    hash_val = sum([ord(c) for c in today])
+    available.sort(key=lambda x: (ord(x[0]) + hash_val))
+    return available[:2]
+
 @app.route('/listening')
 @login_required
 def listening():
-    # Placeholder route for Listening
-    return render_template('listening.html', section='hedefleyici')
+    video_ids = get_today_video_ids()
+    return render_template('listening.html', video_ids=video_ids, section='hedefleyici')
+
+@app.route('/mark_listening_watched', methods=['POST'])
+@login_required
+def mark_listening_watched():
+    data = request.get_json()
+    video_id = data.get('video_id')
+    if not video_id:
+        return jsonify({'success': False, 'error': 'Video ID eksik'}), 400
+    watched = session.get('watched_listening_videos', [])
+    if video_id not in watched:
+        watched.append(video_id)
+        session['watched_listening_videos'] = watched
+    return jsonify({'success': True})
 
 @app.route('/profile')
 @login_required
@@ -887,8 +991,8 @@ def category_questions(category_id):
                          all_topics=all_topics, # Pass all unique topics for the filter
                          selected_topic=selected_topic, # Pass the currently selected topic
                          section='takipsistemi', # Set section for sidebar
-                           show_sidebar=True # Show sidebar
-                           )
+                         show_sidebar=True # Show sidebar
+                         )
 
 @app.route('/favorites')
 @login_required
@@ -1468,7 +1572,7 @@ def gorevlerim_add_task():
             DueDate=due_date,
             Category=category,
             Priority=priority,
-            Status='pending',
+            Status='new',  # Burayı 'new' yapıyoruz
             CreatedAt=datetime.now()
         )
         try:
@@ -1752,6 +1856,22 @@ def inject_notifications():
                 and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) < today)
             )
         ).count()
+        # Günlük görev özeti
+        completed_tasks = Task.query.filter(
+            Task.UserId == current_user.UserId,
+            Task.Status == 'completed',
+            db.text("CAST([Tasks].[CompletedAt] AS DATE) = :today")
+        ).params(today=today).count()
+        overdue_tasks = Task.query.filter(
+            Task.UserId == current_user.UserId,
+            Task.Status == 'pending',
+            Task.DueDate < datetime.now()
+        ).count()
+        summary = f"<b>{today.strftime('%d.%m.%Y')}</b> tarihinde <b>{completed_tasks}</b> görev tamamladın.<br>"
+        summary += f"<b>{overdue_tasks}</b> görevini ise henüz tamamlamadın.<br>"
+        # Motivasyon
+        motivation = "Başarı, küçük adımların toplamıdır!" if completed_tasks > 0 else "Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!"
+        summary += f"<span style='font-size:0.95em;'>{motivation}</span>"
         notifications = []
         if today_questions_count > 0:
             notifications.append({
@@ -1763,12 +1883,12 @@ def inject_notifications():
                 'type': 'Gecikmiş',
                 'msg': f"Geçmişten {past_questions_count} sorunun var!"
             })
-        if not notifications:
-            notifications.append({
-                'type': 'Motivasyon',
-                'msg': 'Hiç bildirimin yok, harikasın!'
-            })
+        # Her zaman motivasyon bildirimi ekle
+        notifications.append({
+            'type': 'Motivasyon',
+            'msg': motivation
+        })
         notification_count = today_questions_count + past_questions_count
-        return dict(notifications=notifications, notification_count=notification_count)
+        return dict(notifications=notifications, notification_count=notification_count, daily_summary=summary)
     except Exception as e:
-        return dict(notifications=[{'type': 'Motivasyon', 'msg': 'Hiç bildirimin yok, harikasın!'}], notification_count=0)
+        return dict(notifications=[{'type': 'Motivasyon', 'msg': 'Hiç bildirimin yok, harikasın!'}], notification_count=0, daily_summary=None)

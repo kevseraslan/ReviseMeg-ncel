@@ -41,22 +41,15 @@
     
     /* Sidebar Styles */
     .sidebar-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 250px;
-        min-height: 100vh;
-        z-index: 1000;
+        /* Sadece görsel stil bırakıldı */
         background: linear-gradient(135deg, #2d225a 0%, #3a2e6e 60%, #232946 100%);
         box-shadow: 2px 0 8px rgba(0,0,0,0.12);
         border-right: 1px solid rgba(48,232,232,0.05);
-        transition: left 0.3s;
-        display: flex;
-        flex-direction: column;
+        transition: all 0.3s ease;
     }
     
     .sidebar-wrapper.sidebar-collapsed {
-        left: -250px;
+        /* sadece style.css'deki layout kuralları geçerli olacak */
     }
     
     .sidebar-wrapper .btn {
@@ -92,6 +85,7 @@
         align-items: center;
         background: transparent;
         position: relative;
+        z-index: 1031; /* Tıklanabilir olması için yüksek z-index */
     }
     
     .sidebar-wrapper .nav-link i {
@@ -120,18 +114,31 @@
         color: #30E8E8;
     }
     
+    /* Ana içerik alanı düzenlemesi */
     .main-content-area {
-        margin-left: 250px;
-        margin-top: 56px;
-        transition: margin-left 0.3s;
+        /* Sadece görsel stil bırakıldı */
+        transition: all 0.3s ease;
+        /* display: flex; */
+        /* justify-content: center; */
     }
     
     .main-content-area.sidebar-collapsed {
-        margin-left: 0;
+        /* sadece style.css'deki layout kuralları geçerli olacak */
     }
     
     #wrapper {
-        display: block !important;
+        display: flex !important;
+        width: 100%;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    /* İç içerik için düzenleme */
+    .inner-content-wrapper {
+        max-width: 1200px;
+        width: 100%;
+        padding: 32px 24px;
+        box-sizing: border-box;
     }
     
     /* Simüle edilmiş yıldızlar */
@@ -167,49 +174,34 @@
     .star-6 { top: 75%; left: 60%; animation: twinkle 4s infinite ease-in-out; }
     .star-7 { top: 85%; left: 90%; animation: twinkle 3s infinite ease-in-out; }
     
-    .inner-content-wrapper {
-        max-width: 1290px;
+    /* Sidebar içindeki menü metinleri için stil */
+    .sidebar-collapsed .menu-text {
+        display: none;
+    }
+    
+    /* İçerik konteynerları için stil */
+    .content-container {
         width: 100%;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 32px 24px;
-        box-sizing: border-box;
+        padding: 15px;
     }
 </style>
 {% endblock %}
 
 {% block page_content %}
     <div id="wrapper">
-    <div class="sidebar-wrapper" id="sidebar-wrapper">
-            <div class="mb-3 text-center" style="margin-top: 4rem;">
-                <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
-                    <i class="fas fa-bullseye"></i> Tekrar Sistemine Geç
-                </a>
-            </div>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}">
-                        <i class="fas fa-book"></i> Kitaplarım
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}">
-                        <i class="fas fa-tasks"></i> Görevlerim
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}">
-                        <i class="fas fa-headphones"></i> Listening
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
-                        <i class="fas fa-chart-bar"></i> Günlük Raporu Gör
-                    </a>
-                </li>
-            </ul>
+        <!-- Hamburger Menu Button -->
+        {# <button id="sidebarToggle" class="hamburger-menu">
+            <i class="fas fa-bars"></i>
+        </button> #}
+
+        <div class="sidebar-wrapper" id="sidebar-wrapper">
+            {% include 'components/side_menu_hedef.html' %}
         </div>
+        
         <div class="main-content-area" id="main-content-col">
-            <div class="inner-content-wrapper">
+            <div class="content-container">
                 <div class="stars">
                     <div class="star star-1"></div>
                     <div class="star star-2"></div>
@@ -226,13 +218,155 @@
                     </a>
                 </div>
                 {% block hedefleyici_content %}
-                    <p>Lütfen yukarıdaki seçeneklerden birini belirleyin.</p>
+                <style>
+                    .planlayici-welcome .feature-card {
+                        background: rgba(35, 41, 70, 0.92);
+                        border-radius: 18px;
+                        box-shadow: 0 6px 32px 0 rgba(48,232,232,0.10);
+                        transition: transform 0.18s, box-shadow 0.18s;
+                        border: 1.5px solid rgba(48,232,232,0.10);
+                        min-height: 260px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: flex-start;
+                    }
+                    .planlayici-welcome .feature-card:hover {
+                        transform: translateY(-7px) scale(1.04);
+                        box-shadow: 0 12px 36px 0 rgba(48,232,232,0.18);
+                        border-color: #30E8E8;
+                    }
+                    .planlayici-welcome .feature-icon {
+                        font-size: 2.7rem;
+                        color: #30E8E8;
+                        margin-bottom: 0.7rem;
+                        margin-top: 0.2rem;
+                        transition: color 0.2s;
+                    }
+                    .planlayici-welcome .feature-card:hover .feature-icon {
+                        color: #fff;
+                        text-shadow: 0 0 12px #30E8E8;
+                    }
+                    .planlayici-welcome h5 {
+                        color: #30E8E8;
+                        font-weight: 700;
+                        font-size: 1.18rem;
+                        margin-bottom: 0.5rem;
+                    }
+                    .planlayici-welcome p {
+                        color: #e0e0e0;
+                        font-size: 1.01rem;
+                        margin-bottom: 0;
+                    }
+                </style>
+                <div class="planlayici-welcome mt-4 mb-5">
+                    <h2 class="text-center mb-4" style="color:#30E8E8; font-weight:800; font-size:2.2rem; text-shadow:0 0 15px #30E8E8, 0 0 20px #232946;">Planlayıcıda Neler Yapabilirsin?</h2>
+                    <div class="row justify-content-center gy-4">
+                        <div class="col-md-6 col-lg-3 d-flex align-items-stretch">
+                            <div class="feature-card text-center p-4 w-100">
+                                <div class="feature-icon mb-2"><i class="fas fa-book-open"></i></div>
+                                <h5>Kitaplarım</h5>
+                                <p>Okuduğun kitapları ekle ve alıntılarını kaydet.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 d-flex align-items-stretch">
+                            <div class="feature-card text-center p-4 w-100">
+                                <div class="feature-icon mb-2"><i class="fas fa-tasks"></i></div>
+                                <h5>Görevlerim</h5>
+                                <p>Günlük görevler ekle, tamamladıkça işaretle.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 d-flex align-items-stretch">
+                            <div class="feature-card text-center p-4 w-100">
+                                <div class="feature-icon mb-2"><i class="fas fa-headphones-alt"></i></div>
+                                <h5>Listening</h5>
+                                <p>Her gün 2 yeni video izle, izlediklerini işaretle.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 d-flex align-items-stretch">
+                            <div class="feature-card text-center p-4 w-100">
+                                <div class="feature-icon mb-2"><i class="fas fa-chart-line"></i></div>
+                                <h5>Günlük Rapor</h5>
+                                <p>İlerlemeni ve Pomodoro süreni gör.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endblock %}
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Sayfa içi hamburger ve sidebar aç/kapa kodları kaldırıldı, ana js veya base.html'deki kod kullanılacak -->
+{#
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sidebar toggle butonu
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar-wrapper');
+        const mainContent = document.getElementById('main-content-col');
+        
+        if (sidebarToggle && sidebar && mainContent) {
+            // Toggle sidebar ve içerik alanı
+            function toggleSidebar() {
+                sidebar.classList.toggle('sidebar-collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                // Sidebar durumunu kontrol et ve hamburger menüyü güncelle
+                if (sidebar.classList.contains('sidebar-collapsed')) {
+                    // Sidebar kapalıysa, hamburger menüyü sola ayarla
+                    sidebarToggle.style.left = '15px';
+                } else {
+                    // Sidebar açıksa, hamburger menüyü sidebarın sağına ayarla
+                    sidebarToggle.style.left = '265px';
+                }
+                
+                // Kullanıcı tercihini local storage'a kaydet
+                const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+                localStorage.setItem('plannerSidebarCollapsed', isCollapsed);
+                
+                // DOM'un yeniden hesaplanmasını için zorla
+                setTimeout(function() {
+                    window.dispatchEvent(new Event('resize'));
+                }, 300); // Animasyon tamamlandıktan sonra
+            }
+            
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            
+            // Sayfa yüklendiğinde kullanıcı tercihini kontrol et
+            const savedState = localStorage.getItem('plannerSidebarCollapsed');
+            if (savedState === 'true') {
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+                sidebarToggle.style.left = '15px';
+            } else {
+                // Sidebar açıksa, hamburger menüyü sidebarın sağına ayarla
+                sidebarToggle.style.left = '265px';
+            }
+            
+            // Mobil cihazlarda responsive davranış
+            function checkWindowSize() {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('sidebar-collapsed');
+                    mainContent.classList.add('sidebar-collapsed');
+                    sidebarToggle.style.left = '15px';
+                }
+            }
+            
+            // Sayfa yüklendiğinde ve boyut değiştiğinde kontrol et
+            checkWindowSize();
+            window.addEventListener('resize', checkWindowSize);
+            
+            // Sidebar menü öğelerine tıklanabilirliği iyileştirme
+            const sidebarLinks = sidebar.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Event'in daha fazla yayılmasını önle
+                });
+            });
+        }
+    });
+</script>
+#}
 {% endblock %} 

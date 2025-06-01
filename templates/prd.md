@@ -1,71 +1,84 @@
-# ReviseMe - Giriş Sayfası Yeniden Tasarımı PRD'si
+# ReviseMe - Planlayıcı Sistemi Sidebar Yeniden Tasarımı ve Entegrasyonu PRD'si
 
 **Sürüm:** 1.0
 **Tarih:** 24 Ekim 2023
 
 ## 1. Giriş
 
-Bu doküman, ReviseMe uygulamasının mevcut giriş sayfasının, referans olarak verilen ikinci görseldeki karanlık ve modern temayı temel alarak, ancak renk paleti olarak üçüncü görseldeki mor tonlarını kullanarak yeniden tasarlanması için gereksinimleri ve yol haritasını tanımlar. Amaç, kullanıcılara görsel olarak çekici, modern ve kullanımı kolay bir giriş deneyimi sunmaktır. Sayfanın üst kısmında sağ tarafta Türkçe "Giriş Yap" ve "Kayıt Ol" butonları yer alacaktır.
+Bu doküman, ReviseMe uygulamasının "Planlayıcı Sistemi" bölümündeki mevcut sabit kenar çubuğu (sidebar) yapısının, "Tekrar Sistemi" bölümünde kullanılan açılır/kapanır (hamburger menü kontrollü) sidebar mekanizması ve görsel stiliyle değiştirilmesi için gereksinimleri ve yol haritasını tanımlar. Amaç, uygulama genelinde tutarlı bir kullanıcı deneyimi sağlamak, ekran alanını daha verimli kullanmak ve modern bir görünüm elde etmektir. Bu değişiklik, "Planlayıcı Sistemi" içindeki tüm sekmeler için geçerli olacaktır ve mevcut işlevsellikleri koruyacaktır.
 
-## 2. Hedef Kitle
+## 2. Mevcut Durum
 
-*   Mevcut ReviseMe kullanıcıları.
+*   **Tekrar Sistemi (Model Davranış):**
+    *   Sidebar, bir hamburger menü ikonu ile açılıp kapanabilir.
+    *   **Açık Durum (1. Fotoğraf):** Sidebar geniştir, ikonların yanında metin etiketleri ("Ana Sayfa", "Bildirimler" vb.) görünür. Ana içerik alanı, sidebar'ın genişliğine göre daralır.
+    *   **Kapalı Durum (2. Fotoğraf):** Sidebar ya tamamen gizlenir ya da sadece ikonları gösterecek şekilde daralır (fotoğrafta tamamen gizlenmiş ve içerik alanı tam genişlikte görünüyor). Ana içerik alanı, sidebar'ın kapalı durumuna göre genişler.
+    *   Sidebar'ın üstünde "Planlayıcıya Geç" gibi bir geçiş butonu bulunur.
+    *   Görsel stil: Koyu arka plan, açık renkli metin ve ikonlar, aktif sekme için vurgu.
 
-## 3. Temel Hedefler
+*   **Planlayıcı Sistemi (Değiştirilecek Bölüm - 3. Fotoğraf):**
+    *   Sidebar sabittir ve her zaman açıktır.
+    *   İkonların yanında metin etiketleri ("Kitaplarım", "Görevlerim" vb.) görünür.
+    *   Sidebar'ın üstünde "Tekrar Sistemine Geç" butonu bulunur.
+    *   Görsel stil: Koyu arka plan, açık renkli metin ve ikonlar.
+    *   Ana içerik alanı, sidebar'ın varlığına göre sabit bir genişliktedir.
 
-*   **Görsel Uyum:** [x] İkinci görseldeki karanlık ve modern tasarım stilini, üçüncü görseldeki mor renk paletiyle başarılı bir şekilde birleştirmek.
-*   **Kullanıcı Kolaylığı:** [x] "Giriş Yap" ve "Kayıt Ol" butonlarını kolayca erişilebilir ve fark edilebilir bir konuma yerleştirmek.
-*   **Modern Tasarım:** [x] Güncel web tasarım trendlerine uygun, şık ve profesyonel bir görünüm oluşturmak.
-*   **Kullanıcı Deneyimi (UX):** [x] Basit ve anlaşılır bir giriş formu sunarak kullanıcıların kolayca oturum açmasını sağlamak.
-*   **Duyarlılık:** [x] Tüm cihazlarda (masaüstü, tablet, mobil) kusursuz bir görünüm ve kullanılabilirlik sağlamak.
+## 3. Hedeflenen Durum (Planlayıcı Sistemi için)
 
-## 4. Yapılacaklar (Referans Görseller Temelinde)
+"Planlayıcı Sistemi", "Tekrar Sistemi" ile aynı sidebar davranışına ve görsel stiline sahip olacaktır:
 
-### 4.1. Genel Tasarım ve Stil
-*   **Arka Plan:** [x] İkinci görseldeki gibi koyu renkli (koyu mor/lacivert tonları), soyut desenli veya gradyanlı bir arka plan kullanılacak. Renkler üçüncü görseldeki mor paletinden seçilecektir.
-*   **Tema:** [x] Genel olarak karanlık bir tema benimsenecek.
-*   **Renk Paleti:** [x] Üçüncü görseldeki morun farklı tonları (açık, orta, koyu) ana renkler olacak. Vurgu renkleri (örneğin butonlar veya aktif elemanlar için) üçüncü görseldeki diğer renklerle uyumlu olacak şekilde belirlenebilir (örneğin turkuaz veya pembe).
+*   **Sidebar Mekanizması:**
+    *   Bir hamburger menü ikonu (muhtemelen sol üst köşede veya ana başlık çubuğunda) ile açılıp kapanabilir olacaktır.
+    *   **Açık Durum:** Sidebar, "Tekrar Sistemi"ndeki gibi geniş olacak, ikonların yanında "Planlayıcı Sistemi"ne ait metin etiketleri ("Kitaplarım", "Görevlerim", "Listening", "Günlük Raporu Gör") görünecektir. "Tekrar Sistemine Geç" butonu mevcut konumunda (veya stil uyumuyla) kalacaktır. Ana içerik alanı buna göre daralacaktır.
+    *   **Kapalı Durum:** Sidebar, "Tekrar Sistemi"ndeki gibi ya tamamen gizlenecek ya da sadece ikonları gösterecek şekilde daralacak. Ana içerik alanı tam genişliğe veya sidebar'ın dar durumuna göre genişleyecektir.
+*   **Görsel Stil:**
+    *   Sidebar'ın arka plan rengi, metin renkleri, ikon stilleri ve aktif sekme vurgusu "Tekrar Sistemi" ile birebir aynı olacaktır.
+    *   Ana içerik alanının mevcut görsel stili (arka plan, renkler vb.) korunacaktır; değişiklik sadece sidebar ve içerik alanının sidebar durumuna göre genişlemesi/daralması ile ilgilidir.
+*   **İşlevsellik:**
+    *   "Planlayıcı Sistemi" içindeki tüm sekmeler ("Kitaplarım", "Görevlerim" vb.) mevcut işlevlerini eksiksiz olarak yerine getirmeye devam edecektir. Sekmelere tıklandığında ilgili içerik doğru şekilde yüklenecektir.
+    *   "Tekrar Sistemine Geç" butonu işlevsel kalacaktır.
 
-### 4.2. Üst Bar (Header)
-*   **Sağ Taraf:**
-    *   **"Giriş Yap" Butonu:** [x] Açık renkli (örneğin açık mor tonu veya beyaz), belirgin bir buton.
-    *   **"Kayıt Ol" Butonu:** [x] "Giriş Yap" butonunun yanında konumlandırılacak, stil olarak farklı (örneğin dolgulu/outlined farkı veya farklı bir vurgu rengi) olabilir. Bu buton da kolayca fark edilebilir olmalı.
-    *   **Logo Konumu:** [x] İkinci görselde bir logo sol üstte yer alıyor. Eğer ReviseMe'nin bir logosu varsa buraya eklenebilir, ancak kullanıcının isteği öncelikle sağ üstte "Giriş Yap/Kayıt Ol" olduğu için bu kısım daha az vurgulu olabilir.
+## 4. Kapsam
 
-### 4.3. Ana İçerik Alanı (Giriş Formu)
-*   **Konum:** [x] Sayfanın ortasında veya sağ tarafında konumlandırılabilir.
-*   **Stil:** [x] Karanlık tema üzerinde kolayca okunabilir açık renkli bir form alanı. Form alanları (kullanıcı adı/e-posta, şifre) ve butonlar belirgin olmalı.
-*   **Elemanlar:**
-    *   **Başlık:** [x] "Hesabınıza Giriş Yapın" gibi bir başlık (üçüncü görseldeki "Login" yerine).
-    *   **Kullanıcı Adı / E-posta Giriş Alanı:** [x] Etiket ve input alanı.
-    *   **Şifre Giriş Alanı:** [x] Etiket ve input alanı (şifre gizleme/gösterme seçeneği düşünülebilir).
-    *   **"Beni Hatırla" Seçeneği:** [x] İsteğe bağlı onay kutusu.
-    *   **Giriş Yap Butonu:** [x] Üçüncü görseldeki "Login to Wifi" benzeri, mor renk paletiyle uyumlu, dikkat çekici bir buton.
-    *   **"Hesabınız yok mu? Kayıt Olun" Linki:** [x] "Kayıt Ol" butonuna alternatif olarak veya altında yer alabilir.
-    *   **"Şifremi Unuttum" Linki:** [x] Giriş yap butonunun altında veya yanında yer alabilir.
-    *   **Sosyal Medya ile Giriş (İsteğe Bağlı):** [x] Google, Facebook, Twitter ikonları (üçüncü görseldeki gibi). "Veya" metniyle ayrılabilir.
-*   **Görsel Öğeler (Sol Taraf veya Arka Planda):**
-    *   [x] İkinci görseldeki Noel teması yerine, üçüncü görseldeki soyut şekillere benzer modern, geometrik şekiller veya dalgalı hatlar kullanılabilir. Bu öğeler mor renk paletiyle uyumlu olmalı.
-    *   [x] Alternatif olarak, sol taraf tamamen düz bir renk alanı olarak bırakılabilir.
+Bu değişiklikler, "Planlayıcı Sistemi" bölümünün ana düzenini (layout) etkileyecek ve bu bölüm altındaki **tüm mevcut ve gelecekte eklenecek sekmeler** için geçerli olacaktır.
 
-### 4.4. Tipografi
-*   [x] Karanlık tema üzerinde iyi okunabilen, modern ve şık fontlar tercih edilecek. Üçüncü görseldeki font stiline benzer bir seçim yapılabilir.
+## 5. Yapılacaklar (Teknik Detaylar)
 
-### 4.5. Duyarlılık (Responsive Design)
-*   [x] Giriş formu ve diğer tüm öğelerin farklı ekran boyutlarında düzgün görünmesi ve kullanıcının kolayca etkileşimde bulunabilmesi sağlanacak.
+### 5.1. Sidebar Bileşeni ve Mekanizması (Planlayıcı Sistemi için)
+*   **[x] Hamburger Menü İkonu Entegrasyonu:** "Planlayıcı Sistemi" ana görünümüne hamburger menü ikonu eklenecek.
+*   **[x] Sidebar Durum Yönetimi:** Sidebar'ın açık/kapalı durumunu yönetecek bir state (React, Vue, Angular state veya vanilla JS ile) mekanizması implemente edilecek.
+*   **[x] Açılır/Kapanır Animasyon:** Sidebar'ın açılıp kapanması sırasında pürüzsüz bir geçiş animasyonu eklenecek (isteğe bağlı ama önerilir).
+*   **[x] Koşullu Görüntüleme:**
+    *   **Açık Durum:** İkonlar ve metin etiketleri birlikte gösterilecek.
+    *   **Kapalı Durum:** Sadece ikonlar gösterilecek veya sidebar tamamen gizlenecek (bu karara göre stil ayarlanacak).
 
-## 5. Prompter (Yönlendirmeler ve Yaratıcı İpuçları)
+### 5.2. İçerik Alanı Düzenlemesi
+*   **[x] Dinamik Genişlik/Kenar Boşluğu:** Ana içerik alanının CSS'i, sidebar'ın açık/kapalı durumuna göre `width` veya `margin-left` değerlerini dinamik olarak değiştirecek şekilde güncellenecek.
+*   **[x] İçerik Kayması Önleme:** Sidebar durumu değiştiğinde içerik alanındaki elemanların istenmeyen şekilde kayması veya bozulması engellenecek.
 
-*   **Tema Birleşimi:** [x] İkinci görselin karanlık ve modern atmosferini korurken, üçüncü görselin canlı mor tonlarını kullanarak enerjik ve dikkat çekici bir kontrast oluşturun.
-*   **Soyut Görsel:** [x] Sol tarafta kullanılacak görsel, öğrenme, ilerleme veya bağlantıyı temsil eden soyut şekiller veya akışkan hatlardan oluşabilir. Bu görsel arka planla uyumlu olmalı ancak giriş formunu gölgede bırakmamalı.
-*   **Buton Stilleri:** [x] "Giriş Yap" ve "Kayıt Ol" butonlarının stilleri birbirinden hafifçe farklı olabilir (dolgu, çizgi, renk tonu) ancak birbiriyle uyumlu olmalı ve kolayca tıklanabilir görünmelidir.
-*   **Form Netliği:** [x] Giriş formu alanlarının ve metinlerinin karanlık arka plan üzerinde yeterince kontrastlı olduğundan emin olun. Açık renkli etiketler ve input alanları kullanılabilir.
+### 5.3. Stil ve Tema Uyumu
+*   **[x] CSS Stillerinin Aktarılması/Uyarlanması:** "Tekrar Sistemi" sidebar'ında kullanılan CSS sınıfları ve stilleri (renkler, fontlar, boşluklar, aktif sekme vurgusu) "Planlayıcı Sistemi" sidebar'ına uygulanacak.
+*   **[x] İkon ve Metin Hizalaması:** Açık ve (eğer varsa) kapalı durumda ikonların ve metinlerin doğru hizalanması sağlanacak.
+*   **[x] "Tekrar Sistemine Geç" Buton Stili:** Bu butonun da genel sidebar stiliyle uyumlu olması sağlanacak.
 
-## 6. Başarı Metrikleri
+### 5.4. Tüm Sekmelere Uygulama
+*   **[x] Ana Layout Entegrasyonu:** Yeni sidebar yapısı, "Planlayıcı Sistemi"nin ana layout bileşenine entegre edilecek, böylece tüm alt sekmeler bu yapıdan otomatik olarak faydalanacak.
+*   **[x] Sekme Bağlantılarının Korunması:** Sidebar'daki her bir linkin ("Kitaplarım", "Görevlerim" vb.) doğru sayfaya/bileşene yönlendirdiğinden emin olunacak.
 
-*   Giriş sayfasının hemen çıkma oranındaki azalma.
-*   Giriş yapma oranındaki başarı.
-*   Kayıt olma butonuna tıklama oranı.
-*   Farklı cihazlarda sayfanın görünüm ve işlevselliği ile ilgili kullanıcı geri bildirimleri.
+### 5.5. İşlevsellik ve Test
+*   **[x] Mevcut İşlevsellik Kontrolü:** "Planlayıcı Sistemi" altındaki her bir sekmenin kendi özel işlevlerinin (veri listeleme, form gönderme, rapor görüntüleme vb.) sidebar değişikliğinden sonra da sorunsuz çalıştığı test edilecek.
+*   **[x] Çapraz Tarayıcı ve Cihaz Uyumluluğu:** Yeni sidebar mekanizmasının farklı tarayıcılarda ve ekran boyutlarında (özellikle mobil ve tablet için duyarlı tasarım) doğru çalıştığı kontrol edilecek.
 
-Bu PRD, yeni giriş sayfanızın geliştirme sürecinde size ve ekibinize rehberlik edecektir. Başarılar!
+## 6. Prompter (Tasarım ve Geliştirme İpuçları)
+
+*   **Bileşen Yeniden Kullanımı:** Eğer "Tekrar Sistemi"ndeki sidebar bir bileşen (component) olarak geliştirildiyse, bu bileşeni "Planlayıcı Sistemi" için de kullanılabilir hale getirmek (prop'lar aracılığıyla içerik ve başlıkları değiştirerek) en verimli yol olacaktır.
+*   **CSS Değişkenleri (Variables):** Uygulama genelinde renkler, boşluklar gibi stil değerleri için CSS değişkenleri kullanılıyorsa, tutarlılığı sağlamak daha kolay olacaktır.
+*   **Global State Yönetimi:** Sidebar'ın açık/kapalı durumu, eğer uygulamanın farklı yerlerinden de etkileniyorsa veya bilinmesi gerekiyorsa global bir state yönetim aracı (Redux, Vuex, Context API vb.) ile yönetilebilir.
+*   **Kademeli Uygulama:** Önce bir sekme için prototip oluşturulup test edilebilir, ardından tüm sisteme yayılabilir.
+
+## 7. Başarı Metrikleri
+
+*   "Planlayıcı Sistemi" sidebar'ının, "Tekrar Sistemi" sidebar'ı ile görsel ve davranışsal olarak %100 tutarlı olması.
+*   Tüm "Planlayıcı Sistemi" sekmelerinin mevcut işlevlerini sorunsuz bir şekilde yerine getirmesi.
+*   Kullanıcı geri bildirimlerinde, uygulama genelindeki tutarlılık ve kullanım kolaylığı hakkında olumlu yorumlar.
+*   Farklı ekran çözünürlüklerinde ve cihazlarda bozulma olmadan çalışması.

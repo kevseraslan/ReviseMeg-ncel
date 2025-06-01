@@ -1,19 +1,32 @@
 <div class="side-menu">
+    <div class="mb-3 text-center" style="margin-top: 4rem; position: relative; z-index: 1032;">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-info w-100 mb-2">
+            <i class="fas fa-bullseye"></i> <span class="menu-text">Tekrar Sistemine Geç</span>
+        </a>
+    </div>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('kitaplarim') }}">
-                <i class="fas fa-book"></i> Kitaplarım
+            <a class="nav-link {% if request.endpoint == 'kitaplarim' %}active{% endif %}" href="{{ url_for('kitaplarim') }}" style="position: relative; z-index: 1032;">
+                <i class="fas fa-book"></i> <span class="menu-text">Kitaplarım</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('gorevlerim') }}">
-                <i class="fas fa-tasks"></i> Görevlerim
+            <a class="nav-link {% if request.endpoint == 'gorevlerim' %}active{% endif %}" href="{{ url_for('gorevlerim') }}" style="position: relative; z-index: 1032;">
+                <i class="fas fa-tasks"></i> <span class="menu-text">Görevlerim</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('listening') }}">
-                <i class="fas fa-headphones"></i> Listening
+            <a class="nav-link {% if request.endpoint == 'listening' %}active{% endif %}" href="{{ url_for('listening') }}" style="position: relative; z-index: 1032;">
+                <i class="fas fa-headphones"></i> <span class="menu-text">Listening</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}" style="position: relative; z-index: 1032;">
+                <i class="fas fa-chart-bar"></i> <span class="menu-text">Günlük Raporu Gör</span>
             </a>
         </li>
     </ul>
+    <div class="sidebar-user mt-4 p-3" style="position: relative; z-index: 1032;">
+        <i class="fas fa-user-circle"></i> <span class="menu-text">{{ current_user.UserName }}</span>
+    </div>
 </div> 

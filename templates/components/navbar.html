@@ -19,16 +19,30 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 320px;">
                     <li class="dropdown-header text-center fw-bold">Bildirimler</li>
+                    {% if daily_summary is defined and daily_summary %}
+                        <li class="px-3 py-2">
+                            <div class="fw-semibold">{{ daily_summary|safe }}</div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                    {% endif %}
                     {% if notifications and notifications|length > 0 %}
                         {% for n in notifications %}
+                            {% if n.type != 'Motivasyon' %}
                             <li class="px-3 py-2">
                                 <div class="fw-semibold">
                                     {{ n.msg }}
                                 </div>
                             </li>
+                            {% endif %}
                         {% endfor %}
-                    {% else %}
-                        <li class="px-3 py-2 text-muted">Hiç bildirimin yok, harikasın!</li>
+                        {# Motivasyon bildirimi en altta gösterilsin #}
+                        {% for n in notifications %}
+                            {% if n.type == 'Motivasyon' %}
+                            <li class="px-3 py-2 text-info">
+                                <div class="fw-semibold">{{ n.msg }}</div>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
                     <li><hr class="dropdown-divider"></li>
                     <li class="text-center mb-1">
@@ -57,5 +71,19 @@
         height: 40px;
         width: 40px;
         margin-left: 0.5rem;
+        color: #fff;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    #sidebarToggle:hover {
+        color: #30E8E8;
+        transform: scale(1.1);
+    }
+    
+    #sidebarToggle:active {
+        transform: scale(0.95);
     }
 </style> 
