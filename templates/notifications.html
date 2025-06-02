@@ -53,13 +53,11 @@
             </div>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="card-title mb-0"><i class="fas fa-rocket me-2"></i>Bugünkü Sorular</h5>
-                        </div>
+                    <div class="card border-0 shadow-sm h-100 dark-card">
                         <div class="card-body">
+                            <h5 class="card-title text-white mb-3"><i class="fas fa-rocket me-2 text-primary"></i>Bugünkü Sorular</h5>
                             {% if today_questions|length > 0 %}
-                                <p class="card-text">Bugün çözmen gereken <b>{{ today_questions|length }}</b> soru seni bekliyor!</p>
+                                <p class="card-text text-white-50">Bugün çözmen gereken <b>{{ today_questions|length }}</b> soru seni bekliyor!</p>
                                 <div class="list-group mb-3">
                                     {% for question in today_questions[:3] %}
                                         <a href="{{ url_for('view_today_question', question_id=question.QuestionId) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">

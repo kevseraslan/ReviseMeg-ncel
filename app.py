@@ -29,7 +29,10 @@ connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Tr
 params = urllib.parse.quote_plus(connection_string)
 
 # SQLAlchemy ayarları
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mssql+pyodbc:///?odbc_connect={params}"
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    'mssql+pyodbc://@MSI\\SQLK/ReviseMe?'
+    'driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes'
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # CSRF koruması
@@ -1867,11 +1870,15 @@ def inject_notifications():
             Task.Status == 'pending',
             Task.DueDate < datetime.now()
         ).count()
-        summary = f"<b>{today.strftime('%d.%m.%Y')}</b> tarihinde <b>{completed_tasks}</b> görev tamamladın.<br>"
-        summary += f"<b>{overdue_tasks}</b> görevini ise henüz tamamlamadın.<br>"
-        # Motivasyon
-        motivation = "Başarı, küçük adımların toplamıdır!" if completed_tasks > 0 else "Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!"
-        summary += f"<span style='font-size:0.95em;'>{motivation}</span>"
+        
+        # --- DAILY SUMMARY START ---
+        summary = f"Bugün tekrar etmeniz gereken <b>{today_questions_count}</b> soru var.<br>"
+        summary += f"Zamanı geçmiş <b>{past_questions_count}</b> sorunuz bulunuyor.<br>"
+        # Motivasyon (isteğe bağlı olarak eklenebilir veya kaldırılabilir)
+        # motivation = "Başarı, küçük adımların toplamıdır!" if completed_tasks > 0 else "Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!"
+        # summary += f"<span style='font-size:0.95em;'>{motivation}</span>"
+        # --- DAILY SUMMARY END ---
+        
         notifications = []
         if today_questions_count > 0:
             notifications.append({
@@ -1886,7 +1893,7 @@ def inject_notifications():
         # Her zaman motivasyon bildirimi ekle
         notifications.append({
             'type': 'Motivasyon',
-            'msg': motivation
+            'msg': "Başarı, küçük adımların toplamıdır!" if completed_tasks > 0 else "Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!"
         })
         notification_count = today_questions_count + past_questions_count
         return dict(notifications=notifications, notification_count=notification_count, daily_summary=summary)

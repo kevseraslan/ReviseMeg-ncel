@@ -97,9 +97,20 @@
             }
         }
         
+        /* Page Header Style */
+        .page-header {
+            font-size: 40px; /* Görseldeki font boyutu */
+            font-family: 'Nunito', sans-serif; /* Görseldeki font ailesi */
+            margin: 0px 0px 32px; /* Görseldeki margin */
+            padding: 32px 0px 0px; /* Görseldeki padding */
+            color: #000000; /* İstenen siyah renk */
+            font-weight: bold; /* Genellikle başlıklar bold olur, görselde de bold gibi duruyor */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Metin gölgesi eklendi */
+        }
+        
         /* Navbar Styles */
         .navbar {
-            background: linear-gradient(135deg, var(--primary-color), #224abe);
+            background: linear-gradient(135deg, #6a37b5, #4e73df);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             padding: 0.5rem 1rem;
             z-index: 1030;
@@ -606,6 +617,57 @@
     
     {# Koyu tema stilleri #}
     <style>
+        body {
+            background-color: transparent !important;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/images/pastel-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        
+        .star-1 { top: 10%; left: 20%; animation: twinkle 3s infinite ease-in-out; }
+        .star-2 { top: 15%; left: 50%; animation: twinkle 4s infinite ease-in-out; }
+        .star-3 { top: 25%; left: 80%; animation: twinkle 5s infinite ease-in-out; }
+        .star-4 { top: 40%; left: 10%; animation: twinkle 4.5s infinite ease-in-out; }
+        .star-5 { top: 60%; left: 30%; animation: twinkle 3.5s infinite ease-in-out; }
+        .star-6 { top: 75%; left: 60%; animation: twinkle 4s infinite ease-in-out; }
+        .star-7 { top: 85%; left: 90%; animation: twinkle 3s infinite ease-in-out; }
+        
         body.dark-theme {
             background-color: #181818;
             color: #f8f9fc;
@@ -756,6 +818,33 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
+    <!-- Zaman Güncelleme Scripti -->
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            if (timeElement && dateElement) {
+                // Saat formatı
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+                
+                // Tarih formatı
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateElement.textContent = now.toLocaleDateString('tr-TR', options);
+            }
+        }
+        
+        // Sayfa yüklendiğinde ve her saniye güncelle
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+    </script>
+    
     <!-- Tema ve Mobil Uyumluluk Scriptleri -->
     <script>
     (function() {
@@ -845,6 +934,16 @@
 <body style="padding-top: 56px;">
     <!-- Header ve Navbar -->
     {% include 'components/navbar.html' %}
+    
+    <div class="stars">
+        <div class="star star-1"></div>
+        <div class="star star-2"></div>
+        <div class="star star-3"></div>
+        <div class="star star-4"></div>
+        <div class="star star-5"></div>
+        <div class="star star-6"></div>
+        <div class="star star-7"></div>
+    </div>
     
     <div class="container-fluid p-0 main-content">
         <div id="wrapper">
@@ -984,12 +1083,12 @@
     </style>
 
     <script>
-        // Mini Pomodoro Functions
-        let miniTimerInterval = null;
-        let miniTimerTimeLeft = 0;
-        let miniTimerState = 'work';
-        let miniPomodoroCount = 0;
-        let miniTimerRunning = false;
+        // --- Unified Pomodoro Timer Logic ---
+        let timerInterval = null;
+        let timerState = 'work'; // 'work', 'shortBreak', 'longBreak'
+        let timerTimeLeft = 0;
+        let pomodoroCount = 0;
+        let timerRunning = false; // Track if timer is actively running
 
         function getPomodoroSettings() {
             const defaults = { workDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, pomodorosUntilLongBreak: 4, autoStartBreaks: true, autoStartPomodoros: true, playSound: true, showNotifications: true };
@@ -999,145 +1098,433 @@
             } catch { return defaults; }
         }
 
-        function updateMiniTimer() {
-            const min = String(Math.floor(miniTimerTimeLeft / 60)).padStart(2, '0');
-            const sec = String(miniTimerTimeLeft % 60).padStart(2, '0');
-            document.getElementById('miniTimerDisplay').textContent = `${min}:${sec}`;
-            
-            // Update progress bar
+        function updateTimerDisplay() {
+            const min = String(Math.floor(timerTimeLeft / 60)).padStart(2, '0');
+            const sec = String(timerTimeLeft % 60).padStart(2, '0');
+            const timeString = `${min}:${sec}`;
+
+            // Update main timer display if it exists on the page
+            const mainTimerDisplay = document.getElementById('timerDisplay');
+            if (mainTimerDisplay) {
+                mainTimerDisplay.textContent = timeString;
+            }
+
+            // Update mini timer display
+            const miniTimerDisplay = document.getElementById('miniTimerDisplay');
+            if (miniTimerDisplay) {
+                miniTimerDisplay.textContent = timeString;
+                 // Update mini timer progress bar
+                const miniProgressBar = document.getElementById('miniProgressBar');
+                if (miniProgressBar) {
+                     const settings = getPomodoroSettings();
+                     let totalTime;
+                     if (timerState === 'work') totalTime = settings.workDuration * 60;
+                     else if (timerState === 'shortBreak') totalTime = settings.shortBreakDuration * 60;
+                     else totalTime = settings.longBreakDuration * 60;
+
+                     const progress = ((totalTime - timerTimeLeft) / totalTime) * 100;
+                     miniProgressBar.style.width = `${progress}%`;
+                }
+            }
+             // Update main timer mode title if it exists
+            const mainTimerModeTitle = document.getElementById('timerModeTitle');
+             let title = '';
+             if (timerState === 'work') title = 'Odaklanma Zamanı';
+             else if (timerState === 'shortBreak') title = 'Mola Zamanı';
+             else title = 'Uzun Mola Zamanı';
+            if (mainTimerModeTitle) {
+                 mainTimerModeTitle.textContent = title;
+             }
+            // Update mini timer mode text
+            const miniTimerMode = document.getElementById('miniTimerMode');
+             if (miniTimerMode) {
+                let modeText = '';
+                if (timerState === 'work') modeText = 'Odaklanma';
+                else if (timerState === 'shortBreak') modeText = 'Kısa Mola';
+                else modeText = 'Uzun Mola';
+                 miniTimerMode.textContent = modeText;
+             }
+
+        }
+
+        function savePomodoroState() {
+            localStorage.setItem('pomodoroTimer', JSON.stringify({
+                timerState,
+                timerTimeLeft,
+                pomodoroCount,
+                running: !!timerInterval // Save if interval is active
+            }));
+        }
+
+        function loadPomodoroState() {
+            const state = JSON.parse(localStorage.getItem('pomodoroTimer'));
             const settings = getPomodoroSettings();
-            let totalTime;
-            if (miniTimerState === 'work') totalTime = settings.workDuration * 60;
-            else if (miniTimerState === 'shortBreak') totalTime = settings.shortBreakDuration * 60;
-            else totalTime = settings.longBreakDuration * 60;
-            
-            const progress = ((totalTime - miniTimerTimeLeft) / totalTime) * 100;
-            document.getElementById('miniProgressBar').style.width = `${progress}%`;
-        }
-
-        function toggleMiniTimer() {
-            if (miniTimerRunning) {
-                stopMiniTimer();
-            } else {
-                startMiniTimer();
-            }
-        }
-
-        function startMiniTimer() {
-            if (!miniTimerTimeLeft) {
-                const settings = getPomodoroSettings();
-                if (miniTimerState === 'work') miniTimerTimeLeft = settings.workDuration * 60;
-                else if (miniTimerState === 'shortBreak') miniTimerTimeLeft = settings.shortBreakDuration * 60;
-                else miniTimerTimeLeft = settings.longBreakDuration * 60;
-            }
-            
-            if (miniTimerInterval) clearInterval(miniTimerInterval);
-            miniTimerInterval = setInterval(() => {
-                if (miniTimerTimeLeft > 0) {
-                    miniTimerTimeLeft--;
-                    updateMiniTimer();
+            if (state) {
+                timerState = state.timerState || 'work';
+                if (state.timerTimeLeft !== undefined && state.timerTimeLeft !== null) {
+                    timerTimeLeft = state.timerTimeLeft;
                 } else {
-                    clearInterval(miniTimerInterval);
-                    miniTimerInterval = null;
-                    miniTimerRunning = false;
-                    
-                    const settings = getPomodoroSettings();
-                    if (miniTimerState === 'work') {
-                        miniPomodoroCount++;
-                        if (miniPomodoroCount % settings.pomodorosUntilLongBreak === 0) {
-                            miniTimerState = 'longBreak';
+                     // If timeleft is missing, reset based on state
+                    if (timerState === 'work') timerTimeLeft = settings.workDuration * 60;
+                    else if (timerState === 'shortBreak') timerTimeLeft = settings.shortBreakDuration * 60;
+                    else timerTimeLeft = settings.longBreakDuration * 60;
+                }
+
+                pomodoroCount = state.pomodoroCount || 0;
+                 timerRunning = state.running || false;
+
+                updateTimerDisplay(); // Update displays immediately on load
+
+                if (timerRunning) {
+                    startTimer(true); // true: automatic start after load
+                     if (typeof showMiniPomodoro === 'function') {
+                         showMiniPomodoro(); // Ensure mini timer is shown if it was running
+                     }
+                }
+
+            } else {
+                // Default state if no saved state
+                timerState = 'work';
+                timerTimeLeft = settings.workDuration * 60;
+                pomodoroCount = 0;
+                timerRunning = false;
+                updateTimerDisplay();
+            }
+        }
+
+        function startTimer(auto = false) {
+            if (timerInterval) clearInterval(timerInterval);
+            timerRunning = true;
+            const settings = getPomodoroSettings();
+
+            // Ensure timerTimeLeft is set if starting fresh in a state
+            if (timerTimeLeft <= 0) {
+                 if (timerState === 'work') timerTimeLeft = settings.workDuration * 60;
+                 else if (timerState === 'shortBreak') timerTimeLeft = settings.shortBreakDuration * 60;
+                 else timerTimeLeft = settings.longBreakDuration * 60;
+            }
+
+            timerInterval = setInterval(() => {
+                if (timerTimeLeft > 0) {
+                    timerTimeLeft--;
+                    updateTimerDisplay();
+                    savePomodoroState();
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    timerRunning = false;
+                    savePomodoroState();
+
+                    if (timerState === 'work') {
+                        pomodoroCount++;
+                        if (pomodoroCount % settings.pomodorosUntilLongBreak === 0) {
+                            timerState = 'longBreak';
                         } else {
-                            miniTimerState = 'shortBreak';
+                            timerState = 'shortBreak';
                         }
                     } else {
-                        miniTimerState = 'work';
+                        // After a break, go back to work
+                        timerState = 'work';
                     }
-                    
-                    updateMiniTimerMode();
+
+                    timerTimeLeft = 0; // Reset time for the *next* session
+                    updateTimerDisplay(); // Update display to 00:00 and new mode
                     notifyPomodoro();
-                    
-                    if (settings.autoStartBreaks && miniTimerState !== 'work') startMiniTimer();
-                    else if (settings.autoStartPomodoros && miniTimerState === 'work') startMiniTimer();
+
+                    // Auto-start next session if enabled
+                    setTimeout(() => {
+                        const currentSettings = getPomodoroSettings(); // Get latest settings
+                        if ((timerState !== 'work' && currentSettings.autoStartBreaks) || (timerState === 'work' && currentSettings.autoStartPomodoros)) {
+                             startTimer(true); // auto start
+                        }
+                    }, 1000); // Wait a moment before starting next session
                 }
             }, 1000);
-            
-            miniTimerRunning = true;
-            document.getElementById('miniToggleBtn').innerHTML = '<i class="fas fa-pause"></i>';
+
+            if (!auto) savePomodoroState(); // Save state immediately if not auto-starting
+             // Update play/pause button text if main timer controls exist
+             const startBtn = document.getElementById('startBtn');
+             const stopBtn = document.getElementById('stopBtn');
+             const skipBtn = document.getElementById('skipBtn');
+             if(startBtn) startBtn.style.display = 'none';
+             if(stopBtn) stopBtn.style.display = 'inline-block';
+             if(skipBtn) skipBtn.style.display = 'inline-block';
+             // Update mini timer play/pause button icon
+             const miniToggleBtn = document.getElementById('miniToggleBtn');
+             if (miniToggleBtn) miniToggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
         }
 
-        function stopMiniTimer() {
-            if (miniTimerInterval) clearInterval(miniTimerInterval);
-            miniTimerInterval = null;
-            miniTimerRunning = false;
-            document.getElementById('miniToggleBtn').innerHTML = '<i class="fas fa-play"></i>';
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            timerRunning = false;
+            savePomodoroState();
+             // Update play/pause button text if main timer controls exist
+             const startBtn = document.getElementById('startBtn');
+             const stopBtn = document.getElementById('stopBtn');
+             const skipBtn = document.getElementById('skipBtn');
+             if(startBtn) startBtn.style.display = 'inline-block';
+             if(stopBtn) stopBtn.style.display = 'none';
+             if(skipBtn) skipBtn.style.display = 'none'; // Hide skip button when stopped
+             // Update mini timer play/pause button icon
+             const miniToggleBtn = document.getElementById('miniToggleBtn');
+             if (miniToggleBtn) miniToggleBtn.innerHTML = '<i class="fas fa-play"></i>';
         }
 
-        function updateMiniTimerMode() {
-            let modeText = '';
-            if (miniTimerState === 'work') modeText = 'Odaklanma';
-            else if (miniTimerState === 'shortBreak') modeText = 'Kısa Mola';
-            else modeText = 'Uzun Mola';
-            document.getElementById('miniTimerMode').textContent = modeText;
+        function resetTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            timerRunning = false;
+            const settings = getPomodoroSettings();
+            timerState = 'work'; // Always reset to work state
+            timerTimeLeft = settings.workDuration * 60; // Reset time to work duration
+            pomodoroCount = 0;
+            updateTimerDisplay();
+            savePomodoroState();
+            // Update main timer control buttons
+             const startBtn = document.getElementById('startBtn');
+             const stopBtn = document.getElementById('stopBtn');
+             const resetBtn = document.getElementById('resetBtn');
+             const saveBtn = document.getElementById('saveBtn');
+             const skipBtn = document.getElementById('skipBtn');
+
+             if(startBtn) startBtn.style.display = 'inline-block';
+             if(stopBtn) stopBtn.style.display = 'none';
+             if(skipBtn) skipBtn.style.display = 'none';
+
+             // Update mini timer buttons
+            const miniToggleBtn = document.getElementById('miniToggleBtn');
+            if (miniToggleBtn) miniToggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+            // Ensure mini pomodoro is visible after reset if needed, though typically reset means stopping
+             // if (typeof showMiniPomodoro === 'function') {
+             //     showMiniPomodoro();
+             // }
         }
 
-        function showMiniPomodoro() {
-            document.getElementById('miniPomodoro').style.display = 'block';
+        function skipTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            timerRunning = false;
+            const settings = getPomodoroSettings();
+
+            if (timerState === 'work') {
+                pomodoroCount++;
+                if (pomodoroCount % settings.pomodorosUntilLongBreak === 0) {
+                    timerState = 'longBreak';
+                } else {
+                    timerState = 'shortBreak';
+                }
+            } else {
+                // If skipping a break, go back to work
+                timerState = 'work';
+            }
+            timerTimeLeft = 0; // Reset time for the *next* session
+            updateTimerDisplay(); // Update display to 00:00 and new mode
+            savePomodoroState();
+
+             // Auto-start next session if enabled
+             setTimeout(() => {
+                 const currentSettings = getPomodoroSettings(); // Get latest settings
+                 if ((timerState !== 'work' && currentSettings.autoStartBreaks) || (timerState === 'work' && currentSettings.autoStartPomodoros)) {
+                     startTimer(true); // auto start
+                 } else {
+                     // If not auto-starting, update buttons to stopped state
+                     const startBtn = document.getElementById('startBtn');
+                     const stopBtn = document.getElementById('stopBtn');
+                     const skipBtn = document.getElementById('skipBtn');
+                     if(startBtn) startBtn.style.display = 'inline-block';
+                     if(stopBtn) stopBtn.style.display = 'none';
+                     if(skipBtn) skipBtn.style.display = 'none';
+                      // Update mini timer play/pause button icon
+                     const miniToggleBtn = document.getElementById('miniToggleBtn');
+                     if (miniToggleBtn) miniToggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+                 }
+             }, 1000); // Wait a moment
+
         }
 
-        function hideMiniPomodoro() {
-            document.getElementById('miniPomodoro').style.display = 'none';
-        }
+        // --- Settings and Save Functions (from timer.html, kept as is) ---
 
         function notifyPomodoro() {
             const settings = getPomodoroSettings();
             if (settings.playSound) {
-                const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c7b.mp3');
-                audio.play();
+                // Use a relative path for local audio file
+                const audio = new Audio('/static/sounds/notification.mp3'); // Assuming a local notification sound
+                audio.play().catch(e => console.error("Error playing sound:", e)); // Add catch for browser restrictions
             }
             if (settings.showNotifications && 'Notification' in window) {
                 if (Notification.permission === 'granted') {
-                    new Notification('Pomodoro Zamanı!', { body: miniTimerState === 'work' ? 'Çalışma zamanı!' : 'Mola zamanı!' });
+                    new Notification('Pomodoro Zamanı!', { body: timerState === 'work' ? 'Çalışma zamanı!' : 'Mola zamanı!' });
                 } else if (Notification.permission !== 'denied') {
                     Notification.requestPermission();
                 }
             }
         }
 
+        function saveSettings() {
+            const settings = {
+                workDuration: parseInt(document.getElementById('workDuration').value),
+                shortBreakDuration: parseInt(document.getElementById('shortBreakDuration').value),
+                longBreakDuration: parseInt(document.getElementById('longBreakDuration').value),
+                pomodorosUntilLongBreak: parseInt(document.getElementById('pomodorosUntilLongBreak').value),
+                autoStartBreaks: document.getElementById('autoStartBreaks').checked,
+                autoStartPomodoros: document.getElementById('autoStartPomodoros').checked,
+                playSound: document.getElementById('playSound').checked,
+                showNotifications: document.getElementById('showNotifications').checked
+            };
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+             alert('Ayarlar başarıyla kaydedildi!');
+             // After saving settings, reset timer to apply new durations
+             resetTimer();
+        }
+
+        // This function is specific to the timer page and interacts with the backend
+        function saveTimer() {
+             const settings = getPomodoroSettings();
+             let totalSeconds = 0;
+             // Calculate time spent in the *current* state before saving
+             let durationInState = 0;
+             if (timerState === 'work') durationInState = settings.workDuration * 60;
+             else if (timerState === 'shortBreak') durationInState = settings.shortBreakDuration * 60;
+             else durationInState = settings.longBreakDuration * 60;
+
+             totalSeconds = durationInState - timerTimeLeft;
+
+            if (totalSeconds <= 0 || !timerRunning) { // Only save if time has elapsed and timer was running
+                 alert('Kaydedilecek bir süre yok veya zamanlayıcı çalışmıyor!');
+                 return;
+            }
+            fetch('/save_timer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ seconds: totalSeconds })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Çalışma süren başarıyla kaydedildi!');
+                     // Optionally reset or continue timer after saving
+                     // resetTimer(); // Or keep running?
+                } else {
+                    alert('Süre kaydedilirken bir hata oluştu.');
+                }
+            });
+        }
+
+        // --- Mini Pomodoro Visibility Functions ---
+
+        function showMiniPomodoro() {
+             const miniPomodoro = document.getElementById('miniPomodoro');
+             const miniPomodoroMinimized = document.getElementById('miniPomodoroMinimized');
+            if (miniPomodoro) miniPomodoro.style.display = 'block';
+             if (miniPomodoroMinimized) miniPomodoroMinimized.style.display = 'none';
+        }
+
+        function hideMiniPomodoro() {
+            const miniPomodoro = document.getElementById('miniPomodoro');
+            const miniPomodoroMinimized = document.getElementById('miniPomodoroMinimized');
+             if (miniPomodoro) miniPomodoro.style.display = 'none';
+             if (miniPomodoroMinimized) miniPomodoroMinimized.style.display = 'none'; // Also hide minimized
+             stopTimer(); // Stop timer when hidden
+        }
+
         function minimizeMiniPomodoro() {
-            document.getElementById('miniPomodoro').style.display = 'none';
-            document.getElementById('miniPomodoroMinimized').style.display = 'flex';
+             const miniPomodoro = document.getElementById('miniPomodoro');
+             const miniPomodoroMinimized = document.getElementById('miniPomodoroMinimized');
+             if (miniPomodoro) miniPomodoro.style.display = 'none';
+             if (miniPomodoroMinimized) miniPomodoroMinimized.style.display = 'flex';
         }
 
         function restoreMiniPomodoro() {
-            document.getElementById('miniPomodoroMinimized').style.display = 'none';
-            document.getElementById('miniPomodoro').style.display = 'block';
+             const miniPomodoro = document.getElementById('miniPomodoro');
+             const miniPomodoroMinimized = document.getElementById('miniPomodoroMinimized');
+             if (miniPomodoroMinimized) miniPomodoroMinimized.style.display = 'none';
+             if (miniPomodoro) miniPomodoro.style.display = 'block';
         }
 
-        // Event Listeners
+        // --- Initialize and Event Listeners ---
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Load settings and previous timer state on page load
+             loadPomodoroState();
+             // Update display based on loaded state
+             updateTimerDisplay();
+
+            // Attach event listeners for Mini Pomodoro Controls
             const miniToggleBtn = document.getElementById('miniToggleBtn');
             const miniCloseBtn = document.getElementById('miniCloseBtn');
             const miniMinimizeBtn = document.getElementById('miniMinimizeBtn');
             const miniRestoreBtn = document.getElementById('miniRestoreBtn');
-            
-            miniToggleBtn.addEventListener('click', toggleMiniTimer);
-            miniCloseBtn.addEventListener('click', hideMiniPomodoro);
-            miniMinimizeBtn.addEventListener('click', minimizeMiniPomodoro);
-            miniRestoreBtn.addEventListener('click', restoreMiniPomodoro);
+            const miniResetBtn = document.getElementById('miniResetBtn'); // Assuming a reset button for mini timer
+            const miniSkipBtn = document.getElementById('miniSkipBtn'); // Assuming a skip button for mini timer
 
-            // Check if timer is running from localStorage
-            const savedState = JSON.parse(localStorage.getItem('pomodoroTimer'));
-            if (savedState && savedState.running) {
-                miniTimerState = savedState.timerState;
-                miniTimerTimeLeft = savedState.timerTimeLeft;
-                miniPomodoroCount = savedState.pomodoroCount;
-                showMiniPomodoro();
-                updateMiniTimerMode();
-                updateMiniTimer();
-                startMiniTimer();
-            }
+            if (miniToggleBtn) miniToggleBtn.addEventListener('click', function() { timerRunning ? stopTimer() : startTimer(); });
+            if (miniCloseBtn) miniCloseBtn.addEventListener('click', hideMiniPomodoro);
+            if (miniMinimizeBtn) miniMinimizeBtn.addEventListener('click', minimizeMiniPomodoro);
+            if (miniRestoreBtn) miniRestoreBtn.addEventListener('click', restoreMiniPomodoro);
+            if (miniResetBtn) miniResetBtn.addEventListener('click', resetTimer);
+            if (miniSkipBtn) miniSkipBtn.addEventListener('click', skipTimer);
+
+            // Attach event listeners for Main Timer Controls (only if on timer page)
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const saveBtn = document.getElementById('saveBtn'); // Assuming a save button for main timer
+            const skipBtn = document.getElementById('skipBtn'); // Assuming a skip button for main timer
+            const saveSettingsBtn = document.querySelector('#pomodoroSettingsForm button[onclick="saveSettings()"]'); // Assuming a save settings button
+
+            if (startBtn) startBtn.addEventListener('click', function() { startTimer(); showMiniPomodoro(); });
+            if (stopBtn) stopBtn.addEventListener('click', stopTimer);
+            if (resetBtn) resetBtn.addEventListener('click', resetTimer);
+             if (saveBtn) saveBtn.addEventListener('click', saveTimer);
+             if (skipBtn) skipBtn.addEventListener('click', skipTimer);
+             if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveSettings);
+
+             // Initial button states based on loaded state
+             if (timerRunning) {
+                 if(startBtn) startBtn.style.display = 'none';
+                 if(stopBtn) stopBtn.style.display = 'inline-block';
+                 if(skipBtn) skipBtn.style.display = 'inline-block';
+                 const miniToggleBtn = document.getElementById('miniToggleBtn');
+                 if (miniToggleBtn) miniToggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+             } else {
+                 if(startBtn) startBtn.style.display = 'inline-block';
+                 if(stopBtn) stopBtn.style.display = 'none';
+                 if(skipBtn) skipBtn.style.display = 'none';
+                 const miniToggleBtn = document.getElementById('miniToggleBtn');
+                 if (miniToggleBtn) miniToggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+             }
+
+             // Ensure mini pomodoro state is consistent on load
+             const savedState = JSON.parse(localStorage.getItem('pomodoroTimer'));
+             if (savedState && savedState.running) {
+                 showMiniPomodoro();
+             } else {
+                 hideMiniPomodoro(); // Hide mini timer if not running on load
+             }
+
+
         });
+
+        // Expose core timer functions globally if needed by other scripts (e.g., timer.html)
+        window.startTimer = startTimer;
+        window.stopTimer = stopTimer;
+        window.resetTimer = resetTimer;
+        window.skipTimer = skipTimer;
+        window.saveSettings = saveSettings;
+        window.saveTimer = saveTimer;
+        window.showMiniPomodoro = showMiniPomodoro;
+        window.hideMiniPomodoro = hideMiniPomodoro;
+        window.minimizeMiniPomodoro = minimizeMiniPomodoro;
+        window.restoreMiniPomodoro = restoreMiniPomodoro;
+
     </script>
     {% block scripts %}{% endblock %}
+    <script>
+(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="x3OBgZhqJWVAgJWH9lBLG";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script>
 </body>
 </html>

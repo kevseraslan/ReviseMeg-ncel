@@ -1,13 +1,19 @@
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid d-flex align-items-center">
-        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-            <i class="fas fa-book-reader me-2"></i>ReviseMe
-        </a>
         <!-- Hamburger Menü Butonu (ReviseMe'nin hemen yanında) -->
         <button id="sidebarToggle" class="btn btn-link ms-2 p-0" type="button" style="font-size: 1.7rem;">
             <i class="fas fa-bars"></i>
         </button>
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+            <i class="fas fa-book-reader me-2"></i>ReviseMe
+        </a>
         <div class="ms-auto d-flex align-items-center">
+            <div id="today-card-navbar" class="d-flex align-items-center me-3">
+                <div class="text-right">
+                    <div id="current-time" style="font-size: 1.2rem; font-weight: 700; color: #fff;"></div>
+                    <div id="current-date" style="font-size: 0.8rem; color: #ccc;"></div>
+                </div>
+            </div>
             <div class="dropdown me-2">
                 <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-bell"></i>
@@ -18,12 +24,18 @@
                     {% endif %}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 320px;">
-                    <li class="dropdown-header text-center fw-bold">Bildirimler</li>
+                    {# daily_summary içeriğini başlık kısmında göster #}
                     {% if daily_summary is defined and daily_summary %}
-                        <li class="px-3 py-2">
-                            <div class="fw-semibold">{{ daily_summary|safe }}</div>
+                        <li class="dropdown-header text-center fw-bold" style="white-space: normal;">
+                            {% set daily_summary_items = daily_summary.split('<br>') %}
+                            {% for item in daily_summary_items %}
+                                <div>{{ item | safe }}</div>
+                            {% endfor %}
                         </li>
-                        <li><hr class="dropdown-divider"></li>
+                        {# Eski daily_summary gösterilen li elementini kaldırıyoruz #}
+                        {# <li><hr class="dropdown-divider"></li> #}
+                    {% else %}
+                         <li class="dropdown-header text-center fw-bold">Bildirimler</li>
                     {% endif %}
                     {% if notifications and notifications|length > 0 %}
                         {% for n in notifications %}

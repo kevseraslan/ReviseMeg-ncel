@@ -4,10 +4,11 @@
 
 {% block page_content %}
 <div class="add-question-bg" style="min-height: 100vh; width: 100vw; position: absolute; left: 0; top: 0; z-index: -1; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);"></div>
-<div class="inner-content-wrapper">
+<div class="inner-content-wrapper" style="margin-top: -4rem;">
+    <img src="/static/images/Photos.jpg" alt="Motivational Image" style="width: 200px; height: 200px; display: block; margin: 0 auto 0; object-fit: cover; border-radius: 15px;">
+    <h1 class="h2 page-header" style="color: #232946; font-weight: bold; margin-top: -6rem;">Yeni Soru Ekle</h1>
     <!-- Üst Menü -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4">
-        <h1 class="h2" style="color: #30e8e8; text-shadow: 0 2px 8px #b2fefa; font-weight: bold;">Yeni Soru Ekle</h1>
         <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Geri Dön
         </a>
@@ -86,5 +87,82 @@
     color: #b2b8d6;
     opacity: 1;
 }
+</style>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .dark-card {
+        background: #232946 url('/static/images/Photos.jpg') no-repeat center center; /* Arka plan görseli eklendi */
+        background-size: cover; /* Görseli kartı kaplayacak şekilde boyutlandır */
+        color: #f8f9fc;
+        position: relative; /* İçerik üstte görünsün diye */
+    }
+
+    /* Arka plan görseli üzerine hafif koyuluk eklemek için overlay */
+    .dark-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Yarı saydam siyah overlay */
+        border-radius: 1.5rem; /* Kart köşeleriyle uyumlu */
+        z-index: 1; /* İçerik ile arka plan arasında */
+    }
+
+    /* Form içeriğinin overlay üzerinde görünür olması için z-index ayarı */
+    .dark-card > form,
+    .dark-card label,
+    .dark-card input,
+    .dark-card select,
+    .dark-card textarea,
+    .dark-card button {
+        position: relative;
+        z-index: 2; /* Overlay'den daha yüksek */
+    }
+
+    .dark-card label.form-label {
+        color: #f8f9fc; /* Yazı rengini belirginleştir */
+    }
+
+    .dark-card input.form-control,
+    .dark-card select.form-select,
+    .dark-card textarea.form-control {
+        background: rgba(255, 255, 255, 0.1); /* Input arka planını yarı saydam yap */
+        border-color: rgba(142, 197, 252, 0.5); /* Border rengini ayarla */
+        color: #f8f9fc; /* Input yazı rengini ayarla */
+    }
+
+    .dark-card input.form-control:focus,
+    .dark-card select.form-select:focus,
+    .dark-card textarea.form-control:focus {
+        border-color: #30e8e8; /* Focus border rengini ayarla */
+        box-shadow: 0 0 0 0.2rem rgba(142, 197, 252, 0.4);
+        background: rgba(255, 255, 255, 0.15); /* Focus arka planını biraz daha belirgin yap */
+        color: #f8f9fc;
+    }
+
+    .dark-card ::placeholder {
+        color: rgba(248, 249, 252, 0.7); /* Placeholder rengini ayarla */
+        opacity: 1;
+    }
+
+    /* Buton stilini temaya uygun yap */
+    .dark-card .btn-primary {
+        background: linear-gradient(135deg, #30e8e8, #8ec5fc); /* Gradyan arka plan */
+        border: none;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(178, 250, 250, 0.4);
+        color: #232946; /* Koyu yazı rengi */
+    }
+
+    .dark-card .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.1); /* Yarı saydam beyaz */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f8f9fc;
+    }
+
 </style>
 {% endblock %} 

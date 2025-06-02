@@ -11,10 +11,10 @@
             <div id="timerDisplay" style="font-size:3rem; font-weight:bold;">25:00</div>
             <div class="mt-3 d-flex justify-content-center gap-2">
                 <button class="btn btn-success" id="startBtn"><i class="fas fa-play"></i> Başlat</button>
-                <button class="btn btn-danger" id="stopBtn"><i class="fas fa-stop"></i> Durdur</button>
+                <button class="btn btn-danger" id="stopBtn" style="display: none;"><i class="fas fa-stop"></i> Durdur</button>
                 <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-undo"></i> Sıfırla</button>
                 <button class="btn btn-primary" id="saveBtn"><i class="fas fa-save"></i> Kaydet</button>
-                <button class="btn btn-warning" id="skipBtn"><i class="fas fa-forward"></i> Mola Geç</button>
+                <button class="btn btn-warning" id="skipBtn" style="display: none;"><i class="fas fa-forward"></i> Mola Geç</button>
             </div>
         </div>
     </div>
@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 <div class="text-end">
-                    <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                    <button type="button" class="btn btn-primary" id="saveSettingsBtnMain">
                         <i class="fas fa-save"></i> Ayarları Kaydet
                     </button>
                 </div>
@@ -164,247 +164,69 @@
 
 {% block scripts %}
 <script>
-let timerInterval = null;
-let timerState = 'work'; // 'work', 'shortBreak', 'longBreak'
-let timerTimeLeft = 0;
-let pomodoroCount = 0;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event listeners for Main Timer Controls on the timer page
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtnMain'); // Use the new ID
 
-function getPomodoroSettings() {
-    const defaults = { workDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, pomodorosUntilLongBreak: 4, autoStartBreaks: true, autoStartPomodoros: true, playSound: true, showNotifications: true };
-    try {
-        const settings = JSON.parse(localStorage.getItem('pomodoroSettings'));
-        return settings ? { ...defaults, ...settings } : defaults;
-    } catch { return defaults; }
-}
-
-function updateTimerDisplay() {
-    const min = String(Math.floor(timerTimeLeft / 60)).padStart(2, '0');
-    const sec = String(timerTimeLeft % 60).padStart(2, '0');
-    document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
-    let title = '';
-    if (timerState === 'work') title = 'Odaklanma Zamanı';
-    else if (timerState === 'shortBreak') title = 'Mola Zamanı';
-    else title = 'Uzun Mola Zamanı';
-    document.getElementById('timerModeTitle').textContent = title;
-
-    // Mini pomodoro güncelleme
-    if (window.miniTimerTimeLeft !== undefined) {
-        window.miniTimerTimeLeft = timerTimeLeft;
-        window.miniTimerState = timerState;
-        window.miniPomodoroCount = pomodoroCount;
-        if (typeof window.updateMiniTimer === 'function') {
-            window.updateMiniTimer();
-            window.updateMiniTimerMode();
-        }
-    }
-}
-
-function savePomodoroState() {
-    localStorage.setItem('pomodoroTimer', JSON.stringify({
-        timerState,
-        timerTimeLeft,
-        pomodoroCount,
-        running: !!timerInterval
-    }));
-}
-
-function loadPomodoroState() {
-    const state = JSON.parse(localStorage.getItem('pomodoroTimer'));
-    const settings = getPomodoroSettings();
-    if (state) {
-        timerState = state.timerState || 'work';
-        if (state.timerTimeLeft !== undefined && state.timerTimeLeft !== null) {
-            timerTimeLeft = state.timerTimeLeft;
-        } else if (timerState === 'work') {
-            timerTimeLeft = settings.workDuration * 60;
-        } else if (timerState === 'shortBreak') {
-            timerTimeLeft = settings.shortBreakDuration * 60;
-        } else {
-            timerTimeLeft = settings.longBreakDuration * 60;
-        }
-        pomodoroCount = state.pomodoroCount || 0;
-        if (state.running) {
-            startTimer(true); // true: otomatik başlat
-            if (typeof window.showMiniPomodoro === 'function') {
-                window.showMiniPomodoro();
-            }
-        } else {
-            updateTimerDisplay();
-        }
-    } else {
-        timerState = 'work';
-        timerTimeLeft = settings.workDuration * 60;
-        pomodoroCount = 0;
-        updateTimerDisplay();
-    }
-}
-
-function startTimer(auto=false) {
-    const settings = getPomodoroSettings();
-    if (!timerTimeLeft) {
-        if (timerState === 'work') timerTimeLeft = settings.workDuration * 60;
-        else if (timerState === 'shortBreak') timerTimeLeft = settings.shortBreakDuration * 60;
-        else timerTimeLeft = settings.longBreakDuration * 60;
-    }
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        if (timerTimeLeft > 0) {
-            timerTimeLeft--;
-            updateTimerDisplay();
-            savePomodoroState();
-        } else {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            savePomodoroState();
-            if (timerState === 'work') {
-                pomodoroCount++;
-                if (pomodoroCount % settings.pomodorosUntilLongBreak === 0) {
-                    timerState = 'longBreak';
-                } else {
-                    timerState = 'shortBreak';
+        if (startBtn) startBtn.addEventListener('click', function() { 
+            if (typeof window.startTimer === 'function') { 
+                window.startTimer(); 
+                if (typeof window.showMiniPomodoro === 'function') { 
+                    window.showMiniPomodoro(); // Show mini timer when main timer starts
                 }
-            } else {
-                timerState = 'work';
             }
-            timerTimeLeft = 0;
-            updateTimerDisplay();
-            notifyPomodoro();
-            setTimeout(() => { 
-                if (getPomodoroSettings().autoStartBreaks && timerState !== 'work') startTimer(); 
-                else if (getPomodoroSettings().autoStartPomodoros && timerState === 'work') startTimer(); 
-            }, 1000);
-        }
-    }, 1000);
-    if (!auto) savePomodoroState();
-}
+        });
 
-function stopTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = null;
-    savePomodoroState();
-}
+        if (stopBtn) stopBtn.addEventListener('click', function() { 
+            if (typeof window.stopTimer === 'function') { 
+                window.stopTimer(); 
+            }
+        });
 
-function resetTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = null;
-    const settings = getPomodoroSettings();
-    if (timerState === 'work') {
-        timerTimeLeft = settings.workDuration * 60;
-    } else if (timerState === 'shortBreak') {
-        timerTimeLeft = settings.shortBreakDuration * 60;
-    } else {
-        timerTimeLeft = settings.longBreakDuration * 60;
-    }
-    pomodoroCount = 0;
-    updateTimerDisplay();
-    savePomodoroState();
-}
+        if (resetBtn) resetBtn.addEventListener('click', function() { 
+            if (typeof window.resetTimer === 'function') { 
+                window.resetTimer(); 
+            }
+        });
 
-function notifyPomodoro() {
-    if (getPomodoroSettings().playSound) {
-        const audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c7b.mp3');
-        audio.play();
-    }
-    if (getPomodoroSettings().showNotifications && 'Notification' in window) {
-        if (Notification.permission === 'granted') {
-            new Notification('Pomodoro Zamanı!', { body: timerState === 'work' ? 'Çalışma zamanı!' : 'Mola zamanı!' });
-        } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission();
-        }
-    }
-}
+        if (saveBtn) saveBtn.addEventListener('click', function() { 
+            if (typeof window.saveTimer === 'function') { 
+                window.saveTimer(); 
+            }
+        });
 
-function saveSettings() {
-    const settings = {
-        workDuration: parseInt(document.getElementById('workDuration').value),
-        shortBreakDuration: parseInt(document.getElementById('shortBreakDuration').value),
-        longBreakDuration: parseInt(document.getElementById('longBreakDuration').value),
-        pomodorosUntilLongBreak: parseInt(document.getElementById('pomodorosUntilLongBreak').value),
-        autoStartBreaks: document.getElementById('autoStartBreaks').checked,
-        autoStartPomodoros: document.getElementById('autoStartPomodoros').checked,
-        playSound: document.getElementById('playSound').checked,
-        showNotifications: document.getElementById('showNotifications').checked
-    };
-    localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
-    alert('Ayarlar başarıyla kaydedildi!');
-    resetTimer();
-}
+        if (skipBtn) skipBtn.addEventListener('click', function() { 
+            if (typeof window.skipTimer === 'function') { 
+                window.skipTimer(); 
+            }
+        });
 
-function saveTimer() {
-    const settings = getPomodoroSettings();
-    let totalSeconds = 0;
-    if (timerState === 'work') {
-        totalSeconds = settings.workDuration * 60 - timerTimeLeft;
-    } else if (timerState === 'shortBreak') {
-        totalSeconds = settings.shortBreakDuration * 60 - timerTimeLeft;
-    } else {
-        totalSeconds = settings.longBreakDuration * 60 - timerTimeLeft;
-    }
-    if (totalSeconds <= 0) {
-        alert('Kaydedilecek bir süre yok!');
-        return;
-    }
-    fetch('/save_timer', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ seconds: totalSeconds })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Çalışma süren başarıyla kaydedildi!');
-            resetTimer();
+        if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', function() {
+             if (typeof window.saveSettings === 'function') {
+                 window.saveSettings();
+             }
+        });
+
+        // Initial button states based on loaded state from base.html
+        // Assuming timerRunning is managed in base.html and accessible
+        // This part might need refinement based on how loadPomodoroState in base.html sets the running state
+        // A simple check based on localStorage might be sufficient if loadPomodoroState sets it correctly.
+        const savedState = JSON.parse(localStorage.getItem('pomodoroTimer'));
+        if (savedState && savedState.running) {
+             if(startBtn) startBtn.style.display = 'none';
+             if(stopBtn) stopBtn.style.display = 'inline-block';
+             if(skipBtn) skipBtn.style.display = 'inline-block';
         } else {
-            alert('Süre kaydedilirken bir hata oluştu.');
+             if(startBtn) startBtn.style.display = 'inline-block';
+             if(stopBtn) stopBtn.style.display = 'none';
+             if(skipBtn) skipBtn.style.display = 'none';
         }
+
     });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Ayarları yükle
-    const savedSettings = localStorage.getItem('pomodoroSettings');
-    if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        document.getElementById('workDuration').value = settings.workDuration;
-        document.getElementById('shortBreakDuration').value = settings.shortBreakDuration;
-        document.getElementById('longBreakDuration').value = settings.longBreakDuration;
-        document.getElementById('pomodorosUntilLongBreak').value = settings.pomodorosUntilLongBreak;
-        document.getElementById('autoStartBreaks').checked = settings.autoStartBreaks;
-        document.getElementById('autoStartPomodoros').checked = settings.autoStartPomodoros;
-        document.getElementById('playSound').checked = settings.playSound;
-        document.getElementById('showNotifications').checked = settings.showNotifications;
-    }
-    loadPomodoroState();
-    document.getElementById('startBtn').onclick = function() { 
-        startTimer();
-        if (typeof window.showMiniPomodoro === 'function') {
-            window.showMiniPomodoro();
-        }
-    };
-    document.getElementById('stopBtn').onclick = stopTimer;
-    document.getElementById('resetBtn').onclick = resetTimer;
-    document.getElementById('saveBtn').onclick = saveTimer;
-    document.getElementById('skipBtn').onclick = function() {
-        if (timerState === 'work') {
-            pomodoroCount++;
-            const settings = getPomodoroSettings();
-            if (pomodoroCount % settings.pomodorosUntilLongBreak === 0) {
-                timerState = 'longBreak';
-            } else {
-                timerState = 'shortBreak';
-            }
-        } else {
-            timerState = 'work';
-        }
-        resetTimer();
-        updateTimerDisplay();
-        savePomodoroState();
-    };
-    // Sayfa ilk açıldığında da başlık doğru görünsün
-    updateTimerDisplay();
-});
 </script>
 {% endblock %} 

@@ -20,8 +20,8 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('favorites') }}">
-            <i class="fas fa-star"></i> Favorilerim
+        <a class="nav-link" href="{{ url_for('favorites') }}" style="color: #800080;">
+            <i class="fas fa-star"></i> Favori Sorularım
         </a>
     </li>
     <li class="nav-item">
@@ -40,6 +40,5 @@
         </a>
     </li>
 </ul>
-<div class="sidebar-user mt-4 p-3">
-    <i class="fas fa-user-circle"></i> {{ current_user.UserName }}
+
 </div> 
