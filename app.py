@@ -476,7 +476,7 @@ def index():
     motivation_message = random.choice(motivation_messages)
 
     # Kategorileri ve her kategorinin soru sayısını getir
-    categories = Category.query.all()
+    categories = Category.query.filter(Category.Name != 'İngilizce').all()
     for category in categories:
         category.question_count = Question.query.filter_by(
             UserId=current_user.UserId,
@@ -792,6 +792,16 @@ def add_question():
             )
             db.session.add(new_question)
             db.session.commit()
+
+            # Yeni Soru Eklendi bildirimi oluştur
+            new_notification = Notification(
+                UserId=current_user.UserId,
+                NotificationType='Yeni Soru Eklendi',
+                Schedule=datetime.now()
+            )
+            db.session.add(new_notification)
+            db.session.commit() # Bildirimi kaydet
+
             flash('Soru başarıyla eklendi.', 'success')
             return redirect(url_for('index'))
         except Exception as e:
@@ -1834,12 +1844,59 @@ if __name__ == '__main__':
 def inject_notifications():
     try:
         if not current_user.is_authenticated:
-            return dict(notifications=[], notification_count=0)
+            return dict(notifications=[], notification_count=0, daily_summary=None)
+
+        user_id = current_user.UserId
         today = datetime.now().date()
-        from sqlalchemy import and_, or_
-        # Bugünkü tekrarlar
+        now = datetime.now()
+        recent_activities = []
+
+        # Son eklenen sorular (son 7 gün)
+        new_questions = Question.query.filter(
+            Question.UserId == user_id,
+            Question.Repeat1Date >= now - timedelta(days=7)
+        ).order_by(Question.Repeat1Date.desc()).limit(5).all()
+        for q in new_questions:
+            recent_activities.append({
+                'type': 'Yeni Soru Eklendi',
+                'msg': f"Yeni bir soru eklendi: {q.Topic or 'Konu Yok'}",
+                'icon': 'fas fa-question-circle',
+                'timestamp': q.Repeat1Date
+            })
+
+        # Son tamamlanan görevler (son 7 gün)
+        completed_tasks = Task.query.filter(
+            Task.UserId == user_id,
+            Task.Status == 'completed',
+            Task.CompletedAt != None,
+            Task.CompletedAt >= now - timedelta(days=7)
+        ).order_by(Task.CompletedAt.desc()).limit(5).all()
+        for t in completed_tasks:
+            recent_activities.append({
+                'type': 'Görev Tamamlandı',
+                'msg': f"Tamamlanan görev: {t.Title}",
+                'icon': 'fas fa-check',
+                'timestamp': t.CompletedAt
+            })
+
+        # Son eklenen kitaplar (son 7 gün)
+        if hasattr(Book, 'StartDate'):
+            new_books = Book.query.filter(
+                Book.UserId == user_id,
+                Book.StartDate != None,
+                Book.StartDate >= now - timedelta(days=7)
+            ).order_by(Book.StartDate.desc()).limit(5).all()
+            for b in new_books:
+                recent_activities.append({
+                    'type': 'Yeni Kitap Eklendi',
+                    'msg': f"Yeni kitap: {b.Title}",
+                    'icon': 'fas fa-book',
+                    'timestamp': b.StartDate
+                })
+
+        # Bugünün soruları özeti
         today_questions_count = Question.query.filter(
-            Question.UserId == current_user.UserId,
+            Question.UserId == user_id,
             Question.IsCompleted == False,
             Question.IsHidden == False,
             or_(
@@ -1848,9 +1905,29 @@ def inject_notifications():
                 and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) == today)
             )
         ).count()
-        # Geçmiş tekrarlar
+        if today_questions_count > 0:
+            recent_activities.append({
+                'type': 'Bugünün Soruları',
+                'msg': f"Bugün çözülmesi gereken {today_questions_count} soru var.",
+                'icon': 'fas fa-calendar-day',
+                'timestamp': now
+            })
+
+        # Başarı örneği (manuel, istersen kaldırabilirsin)
+        recent_activities.append({
+            'type': 'Başarı Kazanıldı',
+            'msg': 'Düzenli çalışma için +5 puan',
+            'icon': 'fas fa-star',
+            'timestamp': now
+        })
+
+        # Zaman sırasına göre sırala ve ilk 5 tanesini al
+        recent_activities.sort(key=lambda x: x['timestamp'], reverse=True)
+        notifications_to_display = recent_activities[:5]
+
+        # Bildirim sayısı (bugün ve geçmiş tekrarlar)
         past_questions_count = Question.query.filter(
-            Question.UserId == current_user.UserId,
+            Question.UserId == user_id,
             Question.IsCompleted == False,
             Question.IsHidden == False,
             or_(
@@ -1859,43 +1936,12 @@ def inject_notifications():
                 and_(Question.Repeat3Date != None, db.func.cast(Question.Repeat3Date, db.Date) < today)
             )
         ).count()
-        # Günlük görev özeti
-        completed_tasks = Task.query.filter(
-            Task.UserId == current_user.UserId,
-            Task.Status == 'completed',
-            db.text("CAST([Tasks].[CompletedAt] AS DATE) = :today")
-        ).params(today=today).count()
-        overdue_tasks = Task.query.filter(
-            Task.UserId == current_user.UserId,
-            Task.Status == 'pending',
-            Task.DueDate < datetime.now()
-        ).count()
-        
-        # --- DAILY SUMMARY START ---
-        summary = f"Bugün tekrar etmeniz gereken <b>{today_questions_count}</b> soru var.<br>"
-        summary += f"Zamanı geçmiş <b>{past_questions_count}</b> sorunuz bulunuyor.<br>"
-        # Motivasyon (isteğe bağlı olarak eklenebilir veya kaldırılabilir)
-        # motivation = "Başarı, küçük adımların toplamıdır!" if completed_tasks > 0 else "Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!"
-        # summary += f"<span style='font-size:0.95em;'>{motivation}</span>"
-        # --- DAILY SUMMARY END ---
-        
-        notifications = []
-        if today_questions_count > 0:
-            notifications.append({
-                'type': 'Bugün',
-                'msg': f"Bugün çözülmesi gereken {today_questions_count} soru var."
-            })
-        if past_questions_count > 0:
-            notifications.append({
-                'type': 'Gecikmiş',
-                'msg': f"Geçmişten {past_questions_count} sorunun var!"
-            })
-        # Her zaman motivasyon bildirimi ekle
-        notifications.append({
-            'type': 'Motivasyon',
-            'msg': "Başarı, küçük adımların toplamıdır!" if completed_tasks > 0 else "Bugün hiç görev tamamlanmadı. Hadi, bir görev tamamlayarak güne güzel bir başlangıç yap!"
-        })
         notification_count = today_questions_count + past_questions_count
-        return dict(notifications=notifications, notification_count=notification_count, daily_summary=summary)
+
+        daily_summary = f"Bugün tekrar etmeniz gereken <b>{today_questions_count}</b> soru var.<br>"
+        daily_summary += f"Zamanı geçmiş <b>{past_questions_count}</b> sorunuz bulunuyor."
+
+        return dict(notifications=notifications_to_display, notification_count=notification_count, daily_summary=daily_summary)
     except Exception as e:
-        return dict(notifications=[{'type': 'Motivasyon', 'msg': 'Hiç bildirimin yok, harikasın!'}], notification_count=0, daily_summary=None)
+        print(f"Bildirim context processor hatası: {str(e)}")
+        return dict(notifications=[{'type': 'Bilgi', 'msg': 'Aktiviteler yüklenemedi.', 'icon': 'fas fa-info-circle', 'timestamp': datetime.now()}], notification_count=0, daily_summary=None)

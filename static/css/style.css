@@ -230,8 +230,6 @@ body.dark-theme .table td {
     width: calc(100% - 250px);
     position: relative;
     z-index: 1020;
-    display: flex;
-    justify-content: center;
 }
 
 .sidebar-wrapper.sidebar-collapsed {
@@ -247,9 +245,9 @@ body.dark-theme .table td {
 /* İçerik konteynerı */
 .content-container {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 15px;
+    /* max-width: 1200px; */ /* Sayfa içeriğinin menü dışında kalan tüm alanı kaplaması için max-width kaldırıldı */
+    margin: 0; /* Ortalamayı kaldır */
+    padding: 15px; /* Her yönden 15px boşluk */
 }
 
 /* Hamburger menü responsive ayarları */

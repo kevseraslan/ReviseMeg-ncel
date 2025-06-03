@@ -22,13 +22,15 @@
         z-index: -1;
     }
     .page-header {
-        color: #30E8E8;
-        margin-bottom: 2rem;
-        padding-top: 2rem;
+        color: #232323;
+        font-size: 2.2rem;
         font-weight: 800;
-        position: relative;
-        font-size: 2.5rem;
-        text-shadow: 0 0 15px rgba(48, 6, 75, 0.8), 0 0 20px rgba(48, 6, 75, 0.4);
+        text-align: left;
+        margin-bottom: 0.8rem;
+        margin-top: 2.5rem;
+        letter-spacing: 2px;
+        font-family: 'Nunito', sans-serif;
+        text-shadow: 0 0 15px #fff, 0 0 20px #fff;
     }
     .past-question-card {
         background-color: rgba(26, 20, 64, 0.85);
@@ -96,7 +98,7 @@
 
 {% block page_content %}
 <div class="container mt-4">
-    <h2 class="page-header">Geçmiş Sorular</h2>
+    <h2 class="page-header"><i class="fas fa-history" style="margin-right: 12px;"></i>Geçmiş Sorular</h2>
     <div class="row">
         {% for question in questions %}
         <div class="col-12 past-question-card">

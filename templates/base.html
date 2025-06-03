@@ -14,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
         :root {
@@ -204,6 +205,11 @@
             border: none;
             border-radius: 0.5rem;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            max-width: 300px; /* Maksimum genişliği ayarla */
+            padding: 0.5rem 1rem; /* İç boşluğu azalt */
+            margin-left: auto; /* Ortalamak için */
+            margin-right: auto; /* Ortalamak için */
+            font-size: 0.9rem; /* Yazı boyutunu küçült (isteğe bağlı) */
         }
         
         .form-control {

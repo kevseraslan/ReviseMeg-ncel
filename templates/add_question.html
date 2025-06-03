@@ -2,11 +2,27 @@
 
 {% block title %}Yeni Soru Ekle - ReviseMe{% endblock %}
 
+{% block styles %}
+<style>
+    h1.page-header {
+        font-family: 'Nunito', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #232323;
+        text-shadow: 0 0 15px #fff, 0 0 20px #fff;
+        text-align: left;
+        margin-bottom: 0.8rem;
+        margin-top: 2.5rem;
+        letter-spacing: 2px;
+    }
+</style>
+{% endblock styles %}
+
 {% block page_content %}
 <div class="add-question-bg" style="min-height: 100vh; width: 100vw; position: absolute; left: 0; top: 0; z-index: -1; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);"></div>
 <div class="inner-content-wrapper" style="margin-top: -4rem;">
     <img src="/static/images/Photos.jpg" alt="Motivational Image" style="width: 200px; height: 200px; display: block; margin: 0 auto 0; object-fit: cover; border-radius: 15px;">
-    <h1 class="h2 page-header" style="color: #232946; font-weight: bold; margin-top: -6rem;">Yeni Soru Ekle</h1>
+    <h1 class="page-header">Yeni Soru Ekle</h1>
     <!-- Üst Menü -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4">
         <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
@@ -15,7 +31,7 @@
     </div>
     <!-- Form -->
     <div class="d-flex justify-content-center">
-        <div class="card shadow-lg p-4 dark-card" style="width:100%; max-width:600px; border-radius: 1.5rem; background: #232946; color: #f8f9fc;">
+        <div class="card shadow-lg p-4 dark-card" style="width:100%; max-width:400px; border-radius: 1.5rem; background: #232946; color: #f8f9fc;">
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">

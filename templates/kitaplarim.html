@@ -7,11 +7,12 @@
 <style>
     /* Kitaplarım sayfasına özel stiller */
     h2 {
-        color: #30E8E8;
-        font-size: 2.5rem;
+        color: #232323;
+        font-size: 2.2rem;
         font-weight: 800;
-        margin-bottom: 1.5rem;
-        text-shadow: 0 0 15px rgba(48, 6, 75, 0.8), 0 0 20px rgba(48, 6, 75, 0.4);
+        margin-bottom: 0.8rem;
+        margin-top: 2.5rem;
+        text-shadow: 0 0 15px #fff, 0 0 20px #fff;
     }
     
     .card {
@@ -169,23 +170,23 @@
 
 {% block hedefleyici_content %}
 <input type="hidden" id="csrf_token_global" value="{{ csrf_token() }}">
-<div class="container-fluid p-0">
+<div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm border-0 mb-4">
+            <h2 style="color:#232323; text-shadow:0 0 15px #fff, 0 0 20px #fff; font-size: 2.2rem; font-weight: 800; text-align: left; margin-bottom: 0.8rem; margin-top: 2.5rem; letter-spacing: 2px;"><i class="fas fa-book" style="margin-right: 12px;"></i>Kitaplarım</h2>
+            <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>Kitaplarım</h2>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
+                        <h5 class="card-title mb-0 text-start">Kitap Listesi</h5>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBookModal">
                             <i class="fas fa-plus-circle me-2"></i>Yeni Kitap Ekle
                         </button>
                     </div>
-                    
                     {% if books %}
-                    <div class="row">
+                    <div class="row gx-5 gy-4">
                         {% for book in books %}
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 w-100">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ book.Title }}</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">{{ book.Author }}</h6>
@@ -198,24 +199,25 @@
                                             {{ (book.CurrentPage / book.TotalPages * 100)|round }}%
                                         </div>
                                     </div>
-                                    <p class="card-text">
-                                        Sayfa: {{ book.CurrentPage }} / {{ book.TotalPages }}
-                                    </p>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#updateProgressModal{{ book.BookId }}">
-                                            İlerleme Güncelle
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-success" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#addQuoteModal{{ book.BookId }}">
-                                            Alıntı Ekle
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-book" 
-                                                data-book-id="{{ book.BookId }}">
-                                            Sil
-                                        </button>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Sayfa: {{ book.CurrentPage }} / {{ book.TotalPages }}</small>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#updateProgressModal{{ book.BookId }}">
+                                                İlerleme Güncelle
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-success" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#addQuoteModal{{ book.BookId }}">
+                                                Alıntı Ekle
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-book" 
+                                                    data-book-id="{{ book.BookId }}">
+                                                Sil
+                                            </button>
+                                        </div>
                                     </div>
                                     {% if book.quotes %}
                                     <div class="mt-3">
@@ -293,7 +295,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                                            <button type="submit" class="btn btn-primary">Ekle</button>
+                                            <button type="submit" class="btn btn-primary">Kaydet</button>
                                         </div>
                                     </form>
                                 </div>
@@ -303,7 +305,7 @@
                     </div>
                     {% else %}
                     <div class="alert alert-info">
-                        Henüz kitap eklenmemiş. Yeni kitap ekleyerek başlayabilirsiniz.
+                        Henüz kitap bulunmuyor. Yeni bir kitap ekleyin!
                     </div>
                     {% endif %}
                 </div>
