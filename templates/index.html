@@ -322,6 +322,13 @@
     <div class="star star-7"></div>
 </div>
 
+<div class="video-full-width-section" style="width: 100vw; margin-left: calc(50% - 50vw); height: 350px; overflow: hidden; position: relative;">
+    <video autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        <source src="{{ url_for('static', filename='images/WhatsApp Video 2025-06-04 saat 21.53.18_50dbedba.mp4') }}" type="video/mp4">
+        Tarayıcınız video etiketini desteklemiyor.
+    </video>
+</div>
+
 <div class="container">
     <h1 class="page-header" style="text-align: left;">Hoş Geldin, {{ current_user.Name }}!</h1>
     <p class="motivation-author">{{ motivation_message }}</p>

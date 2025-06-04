@@ -45,7 +45,7 @@
         }
         
         body {
-            background-color: var(--light-color);
+            background-color: #e1e3ec;
             font-family: 'Nunito', sans-serif;
             color: var(--text-color);
             font-size: 16px;
@@ -263,7 +263,7 @@
         
         .progress-ring-circle-bg {
             fill: transparent;
-            stroke: #e9ecef;
+            stroke: #c0c4cb; /* Darker stroke for visibility */
             stroke-width: 8;
         }
         
@@ -284,6 +284,7 @@
             position: absolute;
             top: 20px;
             left: 20px;
+            background-color: #e1e3ec; /* Arka plan rengini tekrar ayarla */
         }
         
         .category-circle:hover {
@@ -299,6 +300,16 @@
             height: 100%;
             background-color: rgba(0,0,0,0.3);
             transition: background-color 0.3s ease;
+        }
+        
+        /* Kategori daireleri içindeki ikonlar için stil */
+        .category-circle i,
+        .category-circle .fas,
+        .category-circle .fab, /* Font Awesome ikon sınıflarını hedefle */
+        .category-circle .far, /* Diğer Font Awesome stilleri */
+        .category-circle .fal, /* Diğer Font Awesome stilleri */
+        .category-circle .fad { /* Diğer Font Awesome stilleri */
+            color: white !important; /* İkon rengini beyaz yap */
         }
         
         .category-circle:hover .category-overlay {
@@ -626,20 +637,6 @@
         body {
             background-color: transparent !important;
             position: relative;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('/static/images/pastel-background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: -1;
         }
         
         @keyframes twinkle {
